@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
@@ -16,10 +17,17 @@
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
         }
+        .logo {
+            max-width: 100%; /* Ensures the logo is responsive */
+            height: auto; /* Maintains the aspect ratio */
+            display: block; /* Centers the image */
+            margin: 0 auto 20px; /* Centers the image and adds margin below */
+        }
     </style>
 </head>
 <body>
     <div class="container login-container">
+        <img src="{% static 'images/esith_logo.png' %}" alt="Logo" class="logo"> 
         <h2 class="text-center">Login</h2>
         {% if form.errors %}
             <div class="alert alert-danger">Invalid credentials. Please try again.</div>

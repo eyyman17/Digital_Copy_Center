@@ -138,3 +138,14 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = 'redirect_user'
 LOGOUT_REDIRECT_URL = 'login'
+
+
+import os
+
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+
+# Ensure to define STATICFILES_DIRS to include your static directory
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
