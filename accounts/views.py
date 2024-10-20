@@ -11,7 +11,7 @@ def redirect_user(request):
     elif user.user_type == 'direction':
         return redirect('direction_dashboard')
     elif user.user_type == 'professor':
-        return redirect('professor_dashboard')
+        return redirect('professors:submit_document')
     else:
         return redirect('login')  # Fallback
     

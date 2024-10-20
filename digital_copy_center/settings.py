@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'direction',
     'agent',
     'professors',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

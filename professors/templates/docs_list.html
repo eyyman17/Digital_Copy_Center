@@ -1,0 +1,37 @@
+{% extends 'prof_base.html' %}
+
+{% block content %}
+<h2>Mes Documents Soumis</h2>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Filière</th>
+                <th>Nombre de Copies</th>
+                <th>Impression Pour</th>
+                <th>Département</th>
+                <th>Format</th>
+                <th>Couleur</th>
+                <th>Date Soumise</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for document in documents %}
+            <tr>
+                <td>{{ document.filiere }}</td>
+                <td>{{ document.n_copies }}</td>
+                <td>{{ document.impression_pour }}</td>
+                <td>{{ document.departement }}</td>
+                <td>{{ document.format }}</td>
+                <td>{{ document.couleur }}</td>
+                <td>{{ document.date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">Aucun document soumis pour le moment.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'prof_base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="col-md-6">
+        <h2 class="text-center mb-4">Formulaire de Commande</h2>
+        <form method="post" class="bg-white p-4 rounded shadow">
+            {% csrf_token %}
+            <div class="form-group">
+                {{ form.professeur_display.label_tag }}  
+                <input type="text" class="form-control" value="{{ form.professeur_display.value }}" readonly>  
+            </div>
+
+            <!-- Impression Pour Group -->
+            <div class="form-group">
+                <label for="impression_pour">Impression Pour:</label>
+                <div class="d-flex justify-content-between flex-wrap">
+                    <div class="custom-control" data-value="Examen" data-group="impression_pour">Examen</div>
+                    <div class="custom-control" data-value="Cours" data-group="impression_pour">Cours</div>
+                    <div class="custom-control" data-value="Document" data-group="impression_pour">Document</div>
+                </div>
+            </div>
+
+            <!-- Departement -->
+            <div class="form-group">
+                {{ form.departement.label_tag }}  
+                {{ form.departement|add_class:"form-control" }}  
+            </div>
+
+            <!-- Filiere -->
+            <div class="form-group">
+                <label for="filiere">Filière:</label>
+                {{ form.filiere|add_class:"form-control" }}  
+            </div>
+
+            <!-- Number of Copies -->
+            <div class="form-group">
+                <label for="n_copies">Nombre de Copie:</label>
+                {{ form.n_copies|add_class:"form-control" }}  
+            </div>
+
+            <!-- Format -->
+            <div class="form-group">
+                {{ form.format.label_tag }}  
+                {{ form.format|add_class:"form-control" }}  
+            </div>
+
+            <!-- Couleur Group -->
+            <div class="form-group">
+                {{ form.couleur.label_tag }}  
+                {{ form.couleur|add_class:"form-control" }}  
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Soumettre le Document</button>
+        </form>
+    </div>
+</div>
+
+<!-- Separate selection logic for each group -->
+<script>
+    document.querySelectorAll('.custom-control').forEach(item => {
+        item.addEventListener('click', function() {
+            const group = this.getAttribute('data-group');
+            document.querySelectorAll(`.custom-control[data-group="${group}"]`).forEach(control => {
+                control.classList.remove('selected'); // Remove selected class from all in the same group
+            });
+            this.classList.add('selected'); // Add selected class to the clicked item
+        });
+    });
+</script>
+{% endblock %}
