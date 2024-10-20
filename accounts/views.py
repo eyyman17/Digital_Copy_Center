@@ -19,6 +19,7 @@ from django.contrib.auth.views import PasswordResetView
 from django.contrib import messages
 from django.urls import reverse_lazy
 
+
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'reset/password_reset_form.html' 
     success_url = reverse_lazy('password_reset')  # Stay on the same page after success
