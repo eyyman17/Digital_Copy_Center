@@ -5,7 +5,7 @@
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="col-md-6">
         <h2 class="text-center mb-4">Formulaire de Commande</h2>
-        <form method="post" class="bg-white p-4 rounded shadow">
+        <form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow">
             {% csrf_token %}
             <div class="form-group">
                 {{ form.professeur_display.label_tag }}  
@@ -50,6 +50,11 @@
             <div class="form-group">
                 {{ form.couleur.label_tag }}  
                 {{ form.couleur|add_class:"form-control" }}  
+            </div>
+             <!-- Document Upload -->
+            <div class="form-group">
+                <label for="document_file">Télécharger le Document:</label>
+                <input type="file" class="form-control-file" id="document_file" name="document_file"> 
             </div>
 
             <button type="submit" class="btn btn-primary btn-block">Soumettre le Document</button>

@@ -24,6 +24,8 @@ class Document(models.Model):
         ('Couleurs', 'Couleurs'),
     ])
     date = models.DateTimeField(auto_now_add=True)
+    
+    document_file = models.FileField(default='/home/linux/Digital_Copy_Center/accounts/templates/reset/password_reset_subject.txt', upload_to='documents/')
 
     def __str__(self):
         return f"{self.filiere} - {self.n_copies} copies, Format: {self.format}, Couleur: {self.couleur}, Submitted on: {self.date}"

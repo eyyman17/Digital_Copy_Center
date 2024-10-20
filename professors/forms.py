@@ -6,7 +6,7 @@ class DocumentForm(forms.ModelForm):
     professeur_display = forms.CharField(label='Professeur', required=False)  # Read-only field for display
     class Meta:
         model = Document
-        fields = ['filiere', 'n_copies', 'impression_pour', 'departement', 'format', 'couleur']
+        fields = ['filiere', 'n_copies', 'impression_pour', 'departement', 'format', 'couleur', 'document_file']
         widgets = {
             'impression_pour': forms.Select(),
             'departement': forms.Select(),
@@ -32,3 +32,4 @@ class DocumentForm(forms.ModelForm):
 
         self.fields['n_copies'].initial = 1
         
+        self.fields['impression_pour'].required = True 

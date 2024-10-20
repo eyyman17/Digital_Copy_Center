@@ -12,12 +12,14 @@ def history(request):
 @login_required
 def submit_document(request):
     if request.method == 'POST':
-        form = DocumentForm(request.POST, user=request.user)  # Pass the logged-in user
+        form = DocumentForm(request.POST, request.FILES, user=request.user)  # Pass the logged-in user
         if form.is_valid():
             document = form.save(commit=False)
             document.professeur = request.user  # Assign the logged-in user
             document.save()
             return redirect('professor_history')
+        else:
+            print(form.errors)  # Print form errors to the console for debugging 
     else:
         form = DocumentForm(user=request.user)  # Pass the logged-in user
     return render(request, 'submit_document.html', {'form': form})
