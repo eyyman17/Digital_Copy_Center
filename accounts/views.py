@@ -17,7 +17,7 @@ def redirect_user(request):
     
 from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView
 from django.contrib import messages
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'reset/password_reset_form.html' 
