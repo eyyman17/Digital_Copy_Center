@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <style>
         /* Custom styles */
         .login-container {
             max-width: 400px;
             margin: 100px auto; /* Increased margin for better spacing */
             padding: 20px; /* Added padding for aesthetics */
-            border: 1px solid #ccc; /* Added border for better visibility */
+            border: 3px solid #ccc; /* Added border for better visibility */
             border-radius: 8px; /* Rounded corners */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
         }
@@ -28,9 +28,9 @@
 <body>
     <div class="container login-container">
         <img src="{% static 'images/esith_logo.png' %}" alt="Logo" class="logo"> 
-        <h2 class="text-center">Login</h2>
+        <h2 class="text-center">Centre de Copie</h2>
         {% if form.errors %}
-            <div class="alert alert-danger">Invalid credentials. Please try again.</div>
+            <div class="alert alert-danger">Identifiants non valides. Veuillez réessayer.</div>
         {% endif %}
         <form id="loginForm" method="post" onsubmit="return validateForm()">
             {% csrf_token %}
@@ -44,13 +44,18 @@
                 <input type="password" name="password" id="id_password" class="form-control" required>
                 <div id="passwordError" class="text-danger" style="display:none;"></div> <!-- Error message -->
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-primary w-100">Se Connecter</button>
+            <!-- Forgot Password Link -->
+            <div class="mt-3 text-center">
+                <a href="{% url 'password_reset' %}">Mot de passe oublié?</a>
+            </div>
         </form>
     </div>
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
         function validateForm() {
+            
             // Clear previous error messages
             document.getElementById('emailError').style.display = 'none';
             document.getElementById('passwordError').style.display = 'none';
@@ -64,7 +69,7 @@
             // Basic email validation
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(email)) {
-                document.getElementById('emailError').textContent = 'Please enter a valid email address.';
+                document.getElementById('emailError').textContent = "S'il vous plaît, mettez une adresse email valide.";
                 document.getElementById('emailError').style.display = 'block';
                 valid = false;
             }
