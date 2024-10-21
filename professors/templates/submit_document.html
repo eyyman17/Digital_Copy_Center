@@ -92,16 +92,28 @@
             
             // Add selected class to clicked control
             this.classList.add('selected');
-
+    
             // Update hidden input value
             document.getElementById(group).value = value;
-
-            // Enable the submit button if "impression_pour" has a value
-            const impressionPourValue = document.getElementById('impression_pour').value;
-            if (impressionPourValue) {
-                document.getElementById('submitBtn').disabled = false;
-            }
+    
+            // Check if both conditions are met to enable the submit button
+            checkSubmitButton();
         });
     });
+    
+    // Handle document file input change
+    document.getElementById('document_file').addEventListener('change', function() {
+        // Check if both conditions are met to enable the submit button
+        checkSubmitButton();
+    });
+    
+    // Function to check conditions for enabling the submit button
+    function checkSubmitButton() {
+        const impressionPourValue = document.getElementById('impression_pour').value;
+        const documentFileValue = document.getElementById('document_file').value;
+    
+        // Enable the submit button only if both conditions are met
+        document.getElementById('submitBtn').disabled = !(impressionPourValue && documentFileValue);
+    }
 </script>
 {% endblock %}
