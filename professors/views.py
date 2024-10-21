@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import DocumentForm
 from .models import Document
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+
+
 
 @login_required
 def professor_history(request):
@@ -24,3 +28,10 @@ def submit_document(request):
     else:
         form = DocumentForm(user=request.user)
     return render(request, 'submit_document.html', {'form': form})
+
+@login_required
+def download_document(request, pk):
+    document = get_object_or_404(Document, pk=pk)
+    response = HttpResponse(document.document_file, content_type='application/octet-stream')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % document.document_file.name
+    return response

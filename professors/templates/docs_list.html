@@ -72,7 +72,11 @@
         <tbody>
             {% for document in documents %}
             <tr>
-                <td>{{ document.document_file.name }}</td>
+                <td>
+                    <a href="{% url 'professors:download_document' document.pk %}">
+                        {{ document.document_file.name|slice:"10:" }}
+                    </a>
+                </td>
                 <td>{{ document.impression_pour }}</td>
                 <td>{{ document.departement }}</td>
                 <td>{{ document.filiere }}</td>
