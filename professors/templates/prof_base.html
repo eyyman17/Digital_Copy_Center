@@ -31,13 +31,14 @@
             background-color: #ffffff;
             transition: background-color 0.5s ease;
         }
-
+        
+        /* The color of impression_pour choices */
         .custom-control.selected {
             background-color: #007bff;
             color: #ffffff;
         }
-
-        /* Navigation styles */
+        
+        /* The bar's on top of the page: Color. */
         .navbar-custom {
             background-color: #78a8bc;
         }
@@ -51,6 +52,12 @@
             height: 70px;
             margin-right: 80px;
         }
+
+        .logout-form {
+            margin: 0;                                    /* Remove any default form margins */
+            display: inline-flex;                    /* Keeps the form inline with other elements */
+        }
+        
     </style>
 </head>
 <body>
@@ -70,9 +77,10 @@
             <a class="btn btn-buttons mr-5" href="{% url 'professors:professor_history' %}">
                 Mes Commandes
             </a>
-            <a class="btn btn-danger" href="{% url 'logout' %}">
-                Logout
-            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
         </div>
     </nav>
     

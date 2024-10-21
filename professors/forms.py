@@ -36,8 +36,6 @@ class DocumentForm(forms.ModelForm):
         self.fields['couleur'].initial = 'Blanc/Noir'
         self.fields['n_copies'].initial = 1
 
-    def clean_n_copies(self):
-        n_copies = self.cleaned_data.get('n_copies')
-        if n_copies < 1:
-            raise forms.ValidationError("Le nombre de copies doit être au moins 1")
-        return n_copies
+        self.fields['couleur'].choices = [('Blanc/Noir', 'Blanc/Noir'), ('Couleurs', 'Couleurs')]
+        self.fields['format'].choices = [('A4', 'A4'), ('A3', 'A3'),]
+   

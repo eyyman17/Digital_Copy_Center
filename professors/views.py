@@ -23,5 +23,4 @@ def submit_document(request):
             messages.error(request, 'Erreur lors de la soumission du document.')
     else:
         form = DocumentForm(user=request.user)
-    
     return render(request, 'submit_document.html', {'form': form})

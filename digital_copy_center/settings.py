@@ -56,6 +56,18 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
+
+# CSRF Settings
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_NAME = 'csrftoken'
+
+# Session Settings
+SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True
+
+
 ROOT_URLCONF = 'digital_copy_center.urls'
 
 
@@ -141,9 +153,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Default backend
 ]
 
-LOGIN_REDIRECT_URL = 'redirect_user'
-LOGOUT_REDIRECT_URL = 'login'
-
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'accounts:redirect_user'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 import os
 

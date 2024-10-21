@@ -71,7 +71,7 @@
             </div>
 
             {# Submit Button #}
-            <button type="submit" class="btn btn-primary btn-block">Soumettre le Document</button>
+            <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>Soumettre le Document</button>
         </form>
     </div>
 </div>
@@ -95,6 +95,12 @@
 
             // Update hidden input value
             document.getElementById(group).value = value;
+
+            // Enable the submit button if "impression_pour" has a value
+            const impressionPourValue = document.getElementById('impression_pour').value;
+            if (impressionPourValue) {
+                document.getElementById('submitBtn').disabled = false;
+            }
         });
     });
 </script>
