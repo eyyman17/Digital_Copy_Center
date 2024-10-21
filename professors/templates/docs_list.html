@@ -4,41 +4,91 @@
 <h2>Mes Documents Soumis</h2>
 <div class="table-responsive">
     <style>
-        th, td {    
-            text-align: center;             /* Center horizontally */
-            align-items: center;            /* Center vertically */
+        th, td {
+            text-align: center;
+            align-items: center;
+        }
+        
+        /* Status badge base styles */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9em;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        /* Status-specific styles */
+        .status-en_attente {
+            background-color: #FFF3CD;  /* Light yellow */
+            color: #856404;
+            border: 1px solid #FFEEBA;
+        }
+
+        .status-approuve {
+            background-color: #D4EDDA;  /* Light green */
+            color: #155724;
+            border: 1px solid #C3E6CB;
+        }
+
+        .status-refuse {
+            background-color: #F8D7DA;  /* Light pink */
+            color: #721C24;
+            border: 1px solid #F5C6CB;
+        }
+        
+        table.table {  /* Targeting the specific table in your content */
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;  /* Ensures cleaner table display */
+        }
+    
+        table.table th, table.table td {
+            text-align: center;
+            vertical-align: middle;                        /* Centers content vertically */
+            overflow: hidden;                         /* Ensures content doesn't spill outside the cell */
+            white-space: normal;                     /* Allows text to wrap onto multiple lines */
+            word-wrap: break-word;                   /* Breaks long words to prevent overflow */
+            padding: 10px;                           /* Adds padding for spacing inside the cells */
         }
     </style>
+
     <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th>Nom du Document</th> 
-                <th>Impression Pour</th> 
-                <th>Département</th> 
-                <th>Filière</th> 
-                <th>Nombre de Copies</th> 
-                <th>Format</th> 
-                <th>Couleur</th> 
-                <th>Date Soumise</th> 
-                <th>Validation d'impression</th> 
+                <th style="width: 250px;">Nom du Document</th>
+                <th style="width: 100px;">Impression Pour</th>
+                <th style="width: 110px;">Département</th>
+                <th style="width: 70px;">Filière</th>
+                <th style="width: 100px;">N. de Copies</th>
+                <th style="width: 70px;">Format</th>
+                <th style="width: 90px;">Couleur</th>
+                <th style="width: 100px;">Date Soumise</th>
+                <th style="width: 120px;">Validation d'impression</th>
             </tr>
         </thead>
         <tbody>
             {% for document in documents %}
             <tr>
                 <td>{{ document.document_file.name }}</td>
-                <td>{{ document.impression_pour }}</td> 
-                <td>{{ document.departement }}</td> 
-                <td>{{ document.filiere }}</td> 
-                <td>{{ document.n_copies }}</td> 
-                <td>{{ document.format }}</td> 
-                <td>{{ document.couleur }}</td> 
-                <td>{{ document.date }}</td> 
-                <td>{{ document.validation_impression }}</td> 
+                <td>{{ document.impression_pour }}</td>
+                <td>{{ document.departement }}</td>
+                <td>{{ document.filiere }}</td>
+                <td>{{ document.n_copies }}</td>
+                <td>{{ document.format }}</td>
+                <td>{{ document.couleur }}</td>
+                <td>{{ document.date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="status-badge status-{{ document.validation_impression }}">
+                        {{ document.get_validation_impression_display }}
+                    </span>
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="9">Aucun document soumis pour le moment.</td> 
+                <td colspan="9">Aucun document soumis pour le moment.</td>
             </tr>
             {% endfor %}
         </tbody>

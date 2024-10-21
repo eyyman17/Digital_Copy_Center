@@ -4,73 +4,97 @@
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="col-md-6">
+        {# Form Header #}
         <h2 class="text-center mb-4">Formulaire de Commande</h2>
+
+        {# Document Submission Form #}
         <form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow">
             {% csrf_token %}
+            
+            {# Professor Display Field #}
             <div class="form-group">
-                {{ form.professeur_display.label_tag }}  
-                <input type="text" class="form-control" value="{{ form.professeur_display.value }}" readonly>  
+                {{ form.professeur_display.label_tag }}
+                <input type="text" class="form-control" value="{{ form.professeur_display.value }}" readonly>
             </div>
 
-            <!-- Impression Pour Group -->
+            {# Impression Pour Selection #}
             <div class="form-group">
                 <label for="impression_pour">Impression Pour:</label>
+                <input type="hidden" name="impression_pour" id="impression_pour" value="">
                 <div class="d-flex justify-content-between flex-wrap">
-                    <div class="custom-control" data-value="Examen" data-group="impression_pour">Examen</div>
-                    <div class="custom-control" data-value="Cours" data-group="impression_pour">Cours</div>
-                    <div class="custom-control" data-value="Document" data-group="impression_pour">Document</div>
+                    <div class="custom-control" data-value="Examen" data-group="impression_pour">
+                        Examen
+                    </div>
+                    <div class="custom-control" data-value="Cours" data-group="impression_pour">
+                        Cours
+                    </div>
+                    <div class="custom-control" data-value="Document" data-group="impression_pour">
+                        Document
+                    </div>
                 </div>
             </div>
 
-            <!-- Departement -->
+            {# Departement Field #}
             <div class="form-group">
-                {{ form.departement.label_tag }}  
-                {{ form.departement|add_class:"form-control" }}  
+                {{ form.departement.label_tag }}
+                {{ form.departement|add_class:"form-control" }}
             </div>
 
-            <!-- Filiere -->
+            {# Filiere Field #}
             <div class="form-group">
                 <label for="filiere">Filière:</label>
-                {{ form.filiere|add_class:"form-control" }}  
+                {{ form.filiere|add_class:"form-control" }}
             </div>
 
-            <!-- Number of Copies -->
+            {# Number of Copies Field #}
             <div class="form-group">
-                <label for="n_copies">Nombre de Copie:</label>
-                {{ form.n_copies|add_class:"form-control" }}  
+                <label for="n_copies">Nombre de Copies:</label>
+                {{ form.n_copies|add_class:"form-control" }}
             </div>
 
-            <!-- Format -->
+            {# Format Field #}
             <div class="form-group">
-                {{ form.format.label_tag }}  
-                {{ form.format|add_class:"form-control" }}  
+                {{ form.format.label_tag }}
+                {{ form.format|add_class:"form-control" }}
             </div>
 
-            <!-- Couleur Group -->
+            {# Couleur Field #}
             <div class="form-group">
-                {{ form.couleur.label_tag }}  
-                {{ form.couleur|add_class:"form-control" }}  
+                {{ form.couleur.label_tag }}
+                {{ form.couleur|add_class:"form-control" }}
             </div>
-             <!-- Document Upload -->
+
+            {# Document Upload Field #}
             <div class="form-group">
                 <label for="document_file">Télécharger le Document:</label>
-                <input type="file" class="form-control-file" id="document_file" name="document_file"> 
+                <input type="file" class="form-control-file" id="document_file" name="document_file">
             </div>
 
+            {# Submit Button #}
             <button type="submit" class="btn btn-primary btn-block">Soumettre le Document</button>
         </form>
     </div>
 </div>
 
-<!-- Separate selection logic for each group -->
+{# Custom Selection Script #}
 <script>
+    // Handle custom control selection
     document.querySelectorAll('.custom-control').forEach(item => {
         item.addEventListener('click', function() {
+            // Get the group name from data attribute
             const group = this.getAttribute('data-group');
+            const value = this.getAttribute('data-value');
+            
+            // Remove selected class from all controls in the same group
             document.querySelectorAll(`.custom-control[data-group="${group}"]`).forEach(control => {
-                control.classList.remove('selected'); // Remove selected class from all in the same group
+                control.classList.remove('selected');
             });
-            this.classList.add('selected'); // Add selected class to the clicked item
+            
+            // Add selected class to clicked control
+            this.classList.add('selected');
+
+            // Update hidden input value
+            document.getElementById(group).value = value;
         });
     });
 </script>

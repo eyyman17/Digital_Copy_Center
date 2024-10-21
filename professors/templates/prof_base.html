@@ -5,61 +5,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professor Portal</title>
+    
+    {# External CSS #}
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    {# Custom Styles #}
     <style>
+        /* Base styles */
         body {
-            background-color: #f8f9fa; /* Light background for better contrast */
+            background-color: #f8f9fa;
         }
+
+        /* Custom control styles */
         .custom-control {
-            cursor: pointer;                               /* Change the cursor on hover */
-            display: flex;                              /* Use flex to align items */
-            justify-content: center;                       /* Center the content */
-            align-items: center;                       /* Center vertically */
-            border: 2px solid #007bff;                    /* Border color */
-            border-radius: 10px;                          /* Round the corners */
-            padding: 15px;                                    /* Padding for the blocks */
-            margin: 0px;                                    /* Space between blocks */
-            width: 85px; /* Set a fixed width */
-            height: 45px; /* Set a fixed height */
-            background-color: #ffffff;                    /* Default background color */
-            transition: background-color 0.5s ease;       /* Smooth transition for background color */
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0px;
+            width: 85px;
+            height: 45px;
+            background-color: #ffffff;
+            transition: background-color 0.5s ease;
         }
+
         .custom-control.selected {
-            background-color: #007bff;                 /* Background color when selected */
-            color: #ffffff;                               /* Text color when selected */
+            background-color: #007bff;
+            color: #ffffff;
+        }
+
+        /* Navigation styles */
+        .navbar-custom {
+            background-color: #78a8bc;
         }
 
         .btn-buttons {
-            background-color: #a1c310; /* Light Blue */
-            color: black ;
+            background-color: #a1c310;
+            color: black;
         }
-        .navbar-custom {
-            background-color: #78a8bc; /* Navbar background color */
-        }
+
         .logo {
-            height: 70px; /* Set logo height */
-            margin-right: 80px; /* Space between logo and title */
+            height: 70px;
+            margin-right: 80px;
         }
     </style>
 </head>
 <body>
+    {# Navigation Bar #}
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
         <div class="d-flex align-items-center">
             <img src="{% static 'images/esith_logo.png' %}" alt="Logo" class="logo">
-            <a class="navbar-brand font-weight-bold " href="{% url 'professors:professor_history' %}">Portail des professeurs</a>
+            <a class="navbar-brand font-weight-bold" href="{% url 'professors:professor_history' %}">
+                Portail des professeurs
+            </a>
         </div>
+        
         <div class="ml-auto">
-            <a class="btn btn-buttons  mr-3" href="{% url 'professors:submit_document' %}">Formulaire de Commande</a>
-            <a class="btn btn-buttons  mr-5" href="{% url 'professors:professor_history' %}">Mes Commandes</a>
-            <a class="btn btn-danger" href="{% url 'logout' %}">Logout</a>
+            <a class="btn btn-buttons mr-3" href="{% url 'professors:submit_document' %}">
+                Formulaire de Commande
+            </a>
+            <a class="btn btn-buttons mr-5" href="{% url 'professors:professor_history' %}">
+                Mes Commandes
+            </a>
+            <a class="btn btn-danger" href="{% url 'logout' %}">
+                Logout
+            </a>
         </div>
     </nav>
     
+    {# Main Content #}
     <div class="container mt-4">
         {% block content %}
         {% endblock %}
     </div>
     
+    {# JavaScript Dependencies #}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>

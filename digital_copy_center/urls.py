@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-      path('professors/', include(('professors.urls', 'professors'), namespace='professors')),
+    path('professors/', include(('professors.urls', 'professors'), namespace='professors')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=True)),
-]
+] + debug_toolbar_urls()
+
