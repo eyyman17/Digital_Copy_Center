@@ -21,7 +21,7 @@ from django.urls import reverse_lazy
 
 class CustomPasswordResetView(PasswordResetView):
     template_name = 'reset/password_reset_form.html' 
-    success_url = reverse_lazy('password_reset')  # Stay on the same page after success
+    success_url = reverse_lazy('accounts:password_reset')  # Stay on the same page after success
     email_template_name='reset/password_reset_email.html',
     subject_template_name='reset/password_reset_subject.txt'
 
@@ -32,7 +32,7 @@ class CustomPasswordResetView(PasswordResetView):
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
     template_name='reset/password_reset_confirm.html'
-    success_url = reverse_lazy('password_reset_confirm')
+    success_url = reverse_lazy('accounts:password_reset_confirm')
 
     def form_valid(self, form):
         form.save()  # Ensure password is saved
