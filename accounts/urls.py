@@ -11,8 +11,7 @@ urlpatterns = [
         redirect_authenticated_user=True
     ), name='login'),
     path('logout/', auth_views.LogoutView.as_view(
-        next_page='accounts:login',
-        template_name='registration/logged_out.html'
+        next_page='accounts:login'
     ), name='logout'),
     path('redirect/', views.redirect_user, name='redirect_user'),
 
