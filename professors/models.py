@@ -4,8 +4,7 @@ from accounts.models import CustomUser
 class Document(models.Model):
     STATUS_CHOICES = [
         ('en_attente', 'En attente'),
-        ('approuve', 'Approuvé'),
-        ('refuse', 'Refusé')
+        ('approuve', 'Approuvé')
     ]
     
     professeur = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
