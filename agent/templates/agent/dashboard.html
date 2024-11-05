@@ -1,0 +1,108 @@
+{% extends 'agents/base.html' %}
+
+{% block content %}
+<h2 class="mb-4">Document Management Dashboard</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row">
+            <div class="col-md-3">
+                {{ search_form.search_query }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.date_from }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.date_to }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.status }}
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <a href="{% url 'agents:dashboard' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Document Name</th>
+                <th>Professor</th>
+                <th>Purpose</th>
+                <th>Department</th>
+                <th>Program</th>
+                <th>Copies</th>
+                <th>Format</th>
+                <th>Color</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>
+                    <a href="{% url 'agents:download_document' doc.id %}">
+                        {{ doc.document_file.name|slice:"10:" }}
+                    </a>
+                </td>
+                <td>{{ doc.professeur.get_full_name }}</td>
+                <td>{{ doc.impression_pour }}</td>
+                <td>{{ doc.departement }}</td>
+                <td>{{ doc.filiere }}</td>
+                <td>{{ doc.n_copies }}</td>
+                <td>{{ doc.format }}</td>
+                <td>{{ doc.couleur }}</td>
+                <td>{{ doc.date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="badge badge-{{ doc.validation_impression|yesno:'success,warning' }}">
+                        {{ doc.get_validation_impression_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if doc.validation_impression == 'en_attente' and not doc.agentsubmission %}
+                        <form method="post" action="{% url 'agents:approve_document' doc.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" class="text-center">No documents found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if documents.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if documents.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.previous_page_number }}">Previous</a>
+            </li>
+        {% endif %}
+
+        {% for num in documents.paginator.page_range %}
+            <li class="page-item {% if documents.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if documents.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.next_page_number }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
