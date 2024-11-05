@@ -16,10 +16,10 @@ class AgentSubmission(models.Model):
             'professor_name': self.document.professeur.get_full_name(),
             'agent_name': self.submitted_by.get_full_name(),
             'document_name': self.document.document_file.name,
-            'approval_link': f"{settings.BASE_URL}/agents/approve/{self.approval_token}/"
+            'approval_link': f"{settings.BASE_URL}/agent/approve/{self.approval_token}/"
         }
         
-        message = render_to_string('agents/email/approval_request.html', context)
+        message = render_to_string('agent/email/approval_request.html', context)
         
         send_mail(
             'Document Submission Approval Required',

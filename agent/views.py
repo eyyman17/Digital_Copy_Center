@@ -42,7 +42,7 @@ def agent_dashboard(request):
     page = request.GET.get('page')
     documents = paginator.get_page(page)
 
-    return render(request, 'agents/dashboard.html', {
+    return render(request, 'agent/agent_dashboard.html', {
         'documents': documents,
         'search_form': search_form
     })
@@ -67,11 +67,11 @@ def agent_submit(request):
             submission.send_approval_email()
             
             messages.success(request, 'Document submitted successfully. Awaiting professor approval.')
-            return redirect('agents:dashboard')
+            return redirect('agent:agent_dashboard')
     else:
         form = AgentDocumentForm()
     
-    return render(request, 'agents/submit.html', {'form': form})
+    return render(request, 'agent/submit.html', {'form': form})
 
 @login_required
 @user_passes_test(is_agent)
@@ -83,7 +83,7 @@ def approve_document(request, doc_id):
         messages.success(request, 'Document approved successfully.')
     else:
         messages.error(request, 'This document requires professor approval first.')
-    return redirect('agents:dashboard')
+    return redirect('agent:agent_dashboard')
 
 def professor_approval(request, token):
     submission = get_object_or_404(AgentSubmission, approval_token=token)

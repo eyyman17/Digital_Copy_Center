@@ -1,4 +1,4 @@
-{% extends 'agents/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <h2 class="mb-4">Document Management Dashboard</h2>
@@ -20,7 +20,7 @@
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-primary">Search</button>
-                <a href="{% url 'agents:dashboard' %}" class="btn btn-secondary">Reset</a>
+                <a href="{% url 'agent:agent_dashboard' %}" class="btn btn-secondary">Reset</a>
             </div>
         </form>
     </div>
@@ -47,7 +47,7 @@
             {% for doc in documents %}
             <tr>
                 <td>
-                    <a href="{% url 'agents:download_document' doc.id %}">
+                    <a href="{% url 'agent:download_document' doc.id %}">
                         {{ doc.document_file.name|slice:"10:" }}
                     </a>
                 </td>
@@ -66,7 +66,7 @@
                 </td>
                 <td>
                     {% if doc.validation_impression == 'en_attente' and not doc.agentsubmission %}
-                        <form method="post" action="{% url 'agents:approve_document' doc.id %}">
+                        <form method="post" action="{% url 'agent:approve_document' doc.id %}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-success">Approve</button>
                         </form>

@@ -10,13 +10,13 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'agents:dashboard' %}">
+            <a class="navbar-brand" href="{% url 'agent:agent_dashboard' %}">
                 <img src="{% static 'images/esith_logo.png' %}" alt="ESITH Logo" class="logo">
                 Agent Platform
             </a>
             <div class="ml-auto">
-                <a href="{% url 'agents:submit' %}" class="btn btn-primary mr-2">Submit Document</a>
-                <a href="{% url 'agents:dashboard' %}" class="btn btn-secondary mr-2">Dashboard</a>
+                <a href="{% url 'agent:submit' %}" class="btn btn-primary mr-2">Submit Document</a>
+                <a href="{% url 'agent:agent_dashboard' %}" class="btn btn-secondary mr-2">Dashboard</a>
                 <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
             </div>
         </div>
