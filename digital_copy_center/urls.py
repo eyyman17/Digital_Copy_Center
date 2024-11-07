@@ -22,6 +22,7 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
+    path('agent/', include('agent.urls')),
     path('professors/', include(('professors.urls', 'professors'), namespace='professors')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=True)),
 ] + debug_toolbar_urls()

@@ -7,7 +7,7 @@ from django.conf import settings
 def redirect_user(request):
     user = request.user
     if user.user_type == 'agent':
-        return redirect('agent_dashboard')
+        return redirect('agent:agent_dashboard')
     elif user.user_type == 'direction':
         return redirect('direction_dashboard')
     elif user.user_type == 'professor':
