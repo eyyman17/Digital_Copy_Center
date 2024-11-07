@@ -1,19 +1,149 @@
-{% extends 'base.html' %}
+{% extends 'agent_base.html' %}
 {% load widget_tweaks %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="col-md-6">
-        <h2 class="text-center mb-4">Formulaire de Commande</h2>
+        <h2 class="text-center mb-4">Formulaire de Soumission de Document</h2>
         <form method="post" enctype="multipart/form-data" class="bg-white p-4 rounded shadow">
             {% csrf_token %}
-            {{ form|crispy }}
+            
+            {# Professor Display Field #}
+            <div class="form-group">
+                <label for="professeur_name">Nom ou Email du Professeur :</label>
+                {{ form.professeur_name }}
+                {{ form.professeur_id }}
+                <div id="professor-suggestions" class="list-group"></div>
+            </div>
+
+            {# Impression Pour Selection #}
+            <div class="form-group">
+                <label for="impression_pour">Impression Pour:</label>
+                <input type="hidden" name="impression_pour" id="impression_pour" value="">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <div class="custom-control" data-value="Examen" data-group="impression_pour">
+                        Examen
+                    </div>
+                    <div class="custom-control" data-value="Cours" data-group="impression_pour">
+                        Cours
+                    </div>
+                    <div class="custom-control" data-value="Document" data-group="impression_pour">
+                        Document
+                    </div>
+                </div>
+            </div>
+
+            {# Departement Field #}
+            <div class="form-group">
+                {{ form.departement.label_tag }}
+                {{ form.departement|add_class:"form-control" }}
+            </div>
+
+            {# Filiere Field #}
+            <div class="form-group">
+                <label for="filiere">Filière:</label>
+                {{ form.filiere|add_class:"form-control" }}
+            </div>
+
+            {# Number of Copies Field #}
+            <div class="form-group">
+                <label for="n_copies">Nombre de Copies:</label>
+                {{ form.n_copies|add_class:"form-control" }}
+            </div>
+
+            {# Format Field #}
+            <div class="form-group">
+                {{ form.format.label_tag }}
+                {{ form.format|add_class:"form-control" }}
+            </div>
+
+            {# Couleur Field #}
+            <div class="form-group">
+                {{ form.couleur.label_tag }}
+                {{ form.couleur|add_class:"form-control" }}
+            </div>
+
+            {# Document Upload Field #}
+            <div class="form-group">
+                <label for="document_file">Télécharger le Document:</label>
+                <input type="file" class="form-control-file" id="document_file" name="document_file">
+            </div>
+
+            {# Submit Button #}
             <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>Soumettre le Document</button>
         </form>
     </div>
 </div>
 
+{# Custom Selection Script #}
 <script>
-    // Votre script JavaScript pour gérer l'état du bouton Soumettre
+    // Handle custom control selection
+    document.querySelectorAll('.custom-control').forEach(item => {
+        item.addEventListener('click', function() {
+            // Get the group name from data attribute
+            const group = this.getAttribute('data-group');
+            const value = this.getAttribute('data-value');
+            
+            // Remove selected class from all controls in the same group
+            document.querySelectorAll(`.custom-control[data-group="${group}"]`).forEach(control => {
+                control.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked control
+            this.classList.add('selected');
+    
+            // Update hidden input value
+            document.getElementById(group).value = value;
+    
+            // Check if both conditions are met to enable the submit button
+            checkSubmitButton();
+        });
+    });
+    
+    // Handle document file input change
+    document.getElementById('document_file').addEventListener('change', function() {
+        // Check if both conditions are met to enable the submit button
+        checkSubmitButton();
+    });
+    
+    // Function to check conditions for enabling the submit button
+    function checkSubmitButton() {
+        const impressionPourValue = document.getElementById('impression_pour').value;
+        const documentFileValue = document.getElementById('document_file').value;
+    
+        // Enable the submit button only if both conditions are met
+        document.getElementById('submitBtn').disabled = !(impressionPourValue && documentFileValue);
+    }
+</script>
+
+<script>
+    const professeurInput = document.getElementById('id_professeur_name');
+    const professeurIdInput = document.getElementById('id_professeur_id');
+    const suggestionsContainer = document.getElementById('professor-suggestions');
+
+    professeurInput.addEventListener('input', function() {
+        const query = this.value;
+        if (query.length >= 2) {  // Start search after typing 2 characters
+            fetch(`/agent/search_professor/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsContainer.innerHTML = ''; // Clear previous suggestions
+                    data.forEach(prof => {
+                        const suggestionItem = document.createElement('button');
+                        suggestionItem.classList.add('list-group-item', 'list-group-item-action');
+                        suggestionItem.textContent = `${prof.first_name} ${prof.last_name} (${prof.email})`;
+                        suggestionItem.onclick = () => {
+                            professeurInput.value = `${prof.first_name} ${prof.last_name} (${prof.email})`;
+                            professeurIdInput.value = prof.id;
+                            suggestionsContainer.innerHTML = '';
+                        };
+                        suggestionsContainer.appendChild(suggestionItem);
+                    });
+                })
+                .catch(error => console.error('Error fetching professors:', error));
+        } else {
+            suggestionsContainer.innerHTML = ''; // Clear suggestions if fewer than 2 chars
+        }
+    });
 </script>
 {% endblock %}

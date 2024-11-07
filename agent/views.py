@@ -10,6 +10,10 @@ import uuid
 from django.http import HttpResponse
 from django.utils import timezone
 
+from django.http import JsonResponse
+from django.db.models import Q
+from accounts.models import CustomUser
+
 def is_agent(user):
     return user.is_authenticated and user.user_type == 'agent'
 
@@ -76,19 +80,27 @@ def agent_submit(request):
     else:
         form = AgentDocumentForm()
     
-    return render(request, 'agent:submit_doc_agent.html', {'form': form})
+    return render(request, 'submit_doc_agent.html', {'form': form})
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 
 @login_required
 @user_passes_test(is_agent)
 def approve_document(request, doc_id):
     document = get_object_or_404(Document, id=doc_id)
-    if not AgentSubmission.objects.filter(document=document).exists():
+    submission = AgentSubmission.objects.filter(document=document).first()
+    
+    # Check if professor approval is required
+    if submission and not submission.is_approved_by_professor:
+        messages.error(request, 'This document requires professor approval first.')
+    else:
         document.validation_impression = 'approuve'
         document.save()
         messages.success(request, 'Document approved successfully.')
-    else:
-        messages.error(request, 'This document requires professor approval first.')
+
     return redirect('agent:agent_dashboard')
+
 
 def professor_approval(request, token):
     submission = get_object_or_404(AgentSubmission, approval_token=token)
@@ -104,6 +116,7 @@ def professor_approval(request, token):
 
     return redirect('professors:professor_history')
 
+
 @login_required
 @user_passes_test(is_agent)
 def download_document(request, doc_id):
@@ -111,3 +124,16 @@ def download_document(request, doc_id):
     response = HttpResponse(document.document_file, content_type='application/octet-stream')
     response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
     return response
+
+@login_required
+@user_passes_test(is_agent)
+def search_professor(request):
+    query = request.GET.get('q', '')
+    results = []
+    if query:
+        results = CustomUser.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query),
+            user_type='professor'
+        ).values('id', 'first_name', 'last_name', 'email')[:10]
+
+    return JsonResponse(list(results), safe=False)

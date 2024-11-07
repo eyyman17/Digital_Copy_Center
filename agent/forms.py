@@ -3,11 +3,30 @@ from professors.models import Document
 from accounts.models import CustomUser
 
 class AgentDocumentForm(forms.ModelForm):
-    professeur = forms.ModelChoiceField(
-        queryset=CustomUser.objects.filter(user_type='professor'),
-        empty_label="Select Professor",
-        widget=forms.Select(attrs={'class': 'form-control'})
+    professeur_name = forms.CharField(
+        label="Nom ou Email du Professeur",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tapez le nom ou l’email du professeur'})
     )
+    professeur_id = forms.CharField(
+        widget=forms.HiddenInput()
+    )
+
+
+    def clean(self):
+        cleaned_data = super().clean()
+        professeur_id = cleaned_data.get("professeur_id")
+        
+        # Valider si un professeur a bien été sélectionné
+        if not professeur_id:
+            self.add_error('professeur_name', "Veuillez sélectionner un professeur valide.")
+        else:
+            try:
+                cleaned_data['professeur'] = CustomUser.objects.get(id=professeur_id, user_type='professor')
+            except CustomUser.DoesNotExist:
+                self.add_error('professeur_name', "Professeur non valide.")
+
+        return cleaned_data
+
 
     class Meta:
         model = Document
@@ -21,6 +40,8 @@ class AgentDocumentForm(forms.ModelForm):
             'filiere': forms.TextInput(attrs={'class': 'form-control'}),
             'n_copies': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
         }
+
+
 
 class DocumentSearchForm(forms.Form):
     search_query = forms.CharField(

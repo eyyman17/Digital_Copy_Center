@@ -5,6 +5,7 @@ app_name = 'agent'
 
 urlpatterns = [
     path('dashboard/', views.agent_dashboard, name='agent_dashboard'),
+    path('search_professor/', views.search_professor, name='search_professor'),
     path('submit/', views.agent_submit, name='submit'),
     path('approve-document/<int:doc_id>/', views.approve_document, name='approve_document'),
     path('approve/<str:token>/', views.professor_approval, name='professor_approval'),

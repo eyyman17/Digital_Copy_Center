@@ -12,6 +12,8 @@ class AgentSubmission(models.Model):
     submitted_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='agent_submissions')
     
     def send_approval_email(self):
+        # Create the approval link using Django's reverse
+        approval_url = f"{settings.BASE_URL}{reverse('agent:professor_approval', args=[self.approval_token])}"
         context = {
             'professor_name': self.document.professeur.get_full_name(),
             'agent_name': self.submitted_by.get_full_name(),
