@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 def is_agent(user):
-    return user.is_authenticated and user.is_agent
+    return user.is_authenticated and user.user_type == 'agent'
 
 @login_required
 @user_passes_test(is_agent)
@@ -35,14 +35,16 @@ def agent_dashboard(request):
             documents = documents.filter(date__gte=date_from)
         if date_to:
             documents = documents.filter(date__lte=date_to)
-        if status:
+        
+        # Apply status filter only if it's non-empty
+        if status and status in dict(Document.STATUS_CHOICES):
             documents = documents.filter(validation_impression=status)
 
     paginator = Paginator(documents, 10)
     page = request.GET.get('page')
     documents = paginator.get_page(page)
 
-    return render(request, 'agent/agent_dashboard.html', {
+    return render(request, 'agent_dashboard.html', {
         'documents': documents,
         'search_form': search_form
     })
@@ -63,21 +65,24 @@ def agent_submit(request):
                 approval_token=str(uuid.uuid4())
             )
             
-            # Send approval email to professor
-            submission.send_approval_email()
+            # Try sending an approval email to the professor
+            try:
+                submission.send_approval_email()
+                messages.success(request, 'Document submitted successfully. Awaiting professor approval.')
+            except Exception as e:
+                messages.error(request, f'Document submitted, but approval email failed to send: {e}')
             
-            messages.success(request, 'Document submitted successfully. Awaiting professor approval.')
             return redirect('agent:agent_dashboard')
     else:
         form = AgentDocumentForm()
     
-    return render(request, 'agent/submit.html', {'form': form})
+    return render(request, 'agent:submit_doc_agent.html', {'form': form})
 
 @login_required
 @user_passes_test(is_agent)
 def approve_document(request, doc_id):
     document = get_object_or_404(Document, id=doc_id)
-    if not hasattr(document, 'agentsubmission'):
+    if not AgentSubmission.objects.filter(document=document).exists():
         document.validation_impression = 'approuve'
         document.save()
         messages.success(request, 'Document approved successfully.')
@@ -94,7 +99,9 @@ def professor_approval(request, token):
         submission.document.save()
         submission.save()
         messages.success(request, 'Document approved successfully.')
-    
+    else:
+        messages.info(request, 'This document has already been approved.')
+
     return redirect('professors:professor_history')
 
 @login_required

@@ -4,7 +4,7 @@ from accounts.models import CustomUser
 
 class AgentDocumentForm(forms.ModelForm):
     professeur = forms.ModelChoiceField(
-        queryset=CustomUser.objects.filter(is_professor=True),
+        queryset=CustomUser.objects.filter(user_type='professor'),
         empty_label="Select Professor",
         widget=forms.Select(attrs={'class': 'form-control'})
     )
