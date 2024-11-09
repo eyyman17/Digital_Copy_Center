@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/ayoub/Digital_Copy_Center/venv"
+VIRTUAL_ENV="/home/linux/Digital_Copy_Center/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
