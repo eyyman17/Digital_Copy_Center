@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Platform - ESITH</title>
+    {% load static %}
+    
+    {# External CSS #}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    
+    {# Custom Styles #}
+    <style>
+        /* Base styles */
+        body {
+            background-color: #f8f9fa;
+        }
+
+        /* Custom control styles */
+        .custom-control {
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 0px;
+            width: 85px;
+            height: 45px;
+            background-color: #ffffff;
+            transition: background-color 0.5s ease;
+        }
+        
+        /* Selected button styling */
+        .custom-control.selected {
+            background-color: #007bff;
+            color: #ffffff;
+        }
+        
+        /* Navbar styling */
+        .navbar-custom {
+            background-color: #78a8bc;
+        }
+
+        .btn-buttons {
+            background-color: #a1c310;
+            color: black;
+        }
+
+        .logo {
+            height: 70px;
+            margin-right: 80px;
+        }
+
+        .logout-form {
+            margin: 0;
+            display: inline-flex;
+        }
+    </style>
+</head>
+<body>
+    {# Navigation Bar #}
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
+        <div class="d-flex align-items-center">
+            <img src="{% static 'images/esith_logo.png' %}" alt="ESITH Logo" class="logo">
+            <a class="navbar-brand font-weight-bold" href="{% url 'agent:agent_dashboard' %}">
+                Agent Platform
+            </a>
+        </div>
+        
+        <div class="ml-auto">
+            <a class="btn btn-buttons mr-3" href="{% url 'agent:submit' %}">
+                Submit Document
+            </a>
+            <a class="btn btn-buttons mr-5" href="{% url 'agent:agent_dashboard' %}">
+                Dashboard
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+        </div>
+    </nav>
+
+    {# Main Content #}
+    <div class="container mt-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    {# JavaScript Dependencies #}
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

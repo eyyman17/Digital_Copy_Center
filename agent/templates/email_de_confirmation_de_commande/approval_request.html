@@ -1,0 +1,19 @@
+<!-- agent/templates/email.../approval_request.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Approval Request</title>
+</head>
+<body>
+    <p>Dear {{ professor_name }},</p>
+    <p>{{ agent_name }} has submitted a document for printing titled "{{ document_name }}".</p>
+    <p>Please review and approve the order by clicking the button below:</p>
+    <p>
+        <a href="{{ approval_link }}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none;">
+            Approve Document
+        </a>
+    </p>
+    <p>Thank you.</p>
+</body>
+</html>
