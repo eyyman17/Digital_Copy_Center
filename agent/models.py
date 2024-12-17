@@ -31,3 +31,4 @@ class AgentSubmission(models.Model):
             html_message=message,
             fail_silently=False,
         )
+    

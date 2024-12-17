@@ -11,13 +11,14 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = ['filiere', 'n_copies', 'impression_pour', 'departement', 
-                 'format', 'couleur', 'document_file']
+                 'format','recto_verso', 'couleur', 'document_file']
         widgets = {
             'impression_pour': forms.Select(attrs={'class': 'form-control'}),
             'departement': forms.Select(attrs={'class': 'form-control'}),
             'format': forms.Select(attrs={'class': 'form-control'}),
             'couleur': forms.Select(attrs={'class': 'form-control'}),
             'filiere': forms.TextInput(attrs={'class': 'form-control'}),
+            'recto_verso': forms.Select(attrs={'class': 'form-control'}) ,
             'n_copies': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
         }
 

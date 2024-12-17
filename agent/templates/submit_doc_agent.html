@@ -10,7 +10,7 @@
             
             {# Professor Display Field #}
             <div class="form-group">
-                <label for="professeur_name">Nom ou Email du Professeur :</label>
+                <label for="{{ form.professeur_name.id_for_label }}">Nom ou Email du Professeur :</label>
                 {{ form.professeur_name }}
                 {{ form.professeur_id }}
                 <div id="professor-suggestions" class="list-group"></div>
@@ -41,13 +41,13 @@
 
             {# Filiere Field #}
             <div class="form-group">
-                <label for="filiere">Filière:</label>
+                <label for="{{ form.filiere.id_for_label }}">Filière:</label>
                 {{ form.filiere|add_class:"form-control" }}
             </div>
 
             {# Number of Copies Field #}
             <div class="form-group">
-                <label for="n_copies">Nombre de Copies:</label>
+                <label for="{{ form.n_copies.id_for_label }}">Nombre de Copies:</label>
                 {{ form.n_copies|add_class:"form-control" }}
             </div>
 
@@ -55,6 +55,14 @@
             <div class="form-group">
                 {{ form.format.label_tag }}
                 {{ form.format|add_class:"form-control" }}
+            </div>
+
+            <div class="form-group">
+                <label for="recto_verso">Type d'impression :</label>
+                <select id="recto_verso" name="recto_verso" class="form-control">
+                    <option value="recto">Recto</option>
+                    <option value="recto-verso">Recto-Verso</option>
+                </select>
             </div>
 
             {# Couleur Field #}
@@ -84,6 +92,7 @@
             const group = this.getAttribute('data-group');
             const value = this.getAttribute('data-value');
             
+            
             // Remove selected class from all controls in the same group
             document.querySelectorAll(`.custom-control[data-group="${group}"]`).forEach(control => {
                 control.classList.remove('selected');
@@ -102,6 +111,7 @@
     
     // Handle document file input change
     document.getElementById('document_file').addEventListener('change', function() {
+
         // Check if both conditions are met to enable the submit button
         checkSubmitButton();
     });
