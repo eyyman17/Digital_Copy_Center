@@ -1,0 +1,29 @@
+{% extends 'dir_base.html' %}
+
+{% block title %}Liste des Professeurs{% endblock %}
+
+{% block content %}
+    <h1>Liste des Professeurs</h1>
+    <form method="get">
+        {{ form.as_p }}
+        <button type="submit">Rechercher</button>
+    </form>
+    <table>
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Département</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professor in professors %}
+                <tr>
+                    <td>{{ professor.user.first_name }} {{ professor.user.last_name }}</td>
+                    <td>{{ professor.user.email }}</td>
+                    <td>{{ professor.department }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

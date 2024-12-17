@@ -1,0 +1,28 @@
+{% extends 'dir_base.html' %}
+
+{% block title %}Tableau de bord{% endblock %}
+
+{% block content %}
+    <section class="dashboard">
+        <h1>Bienvenue sur votre Tableau de bord</h1>
+        <p>Ceci est le tableau de bord principal de l'application Direction.</p>
+
+        <h2>Liste des professeurs :</h2>
+        <ul>
+            {% for professor in professors %}
+                <li>{{ professor.name }} - {{ professor.email }}</li>
+            {% empty %}
+                <li>Aucun professeur trouvé.</li>
+            {% endfor %}
+        </ul>
+
+        <h2>Commandes récentes :</h2>
+        <ul>
+            {% for command in commands %}
+                <li>{{ command.name }} - {{ command.status }}</li>
+            {% empty %}
+                <li>Aucune commande récente.</li>
+            {% endfor %}
+        </ul>
+    </section>
+{% endblock %}

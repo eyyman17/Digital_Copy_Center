@@ -1,0 +1,27 @@
+{% extends 'dir_base.html' %}
+
+{% block title %}Liste des Commandes{% endblock %}
+
+{% block content %}
+    <h1>Liste des Commandes</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for command in commands %}
+                <tr>
+                    <td>{{ command.document_name }}</td>
+                    <td>{{ command.description }}</td>
+                    <td>{{ command.get_status_display }}</td>
+                    <td>{{ command.created_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

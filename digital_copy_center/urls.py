@@ -24,6 +24,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('agent/', include('agent.urls')),
     path('professors/', include(('professors.urls', 'professors'), namespace='professors')),
+    path('direction/', include('direction.urls')),
     path('', RedirectView.as_view(url='/accounts/login/', permanent=True)),
 ] + debug_toolbar_urls()
 

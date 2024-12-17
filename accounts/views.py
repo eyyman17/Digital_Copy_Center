@@ -9,7 +9,7 @@ def redirect_user(request):
     if user.user_type == 'agent':
         return redirect('agent:agent_dashboard')
     elif user.user_type == 'direction':
-        return redirect('direction_dashboard')
+        return redirect('direction:direction_dashboard')
     elif user.user_type == 'professor':
         return redirect('professors:submit_document')
     else:
