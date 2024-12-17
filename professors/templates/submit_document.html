@@ -57,6 +57,15 @@
                 {{ form.format.label_tag }}
                 {{ form.format|add_class:"form-control" }}
             </div>
+            
+            <div class="form-group">
+                <label for="recto_verso">Type d'impression :</label>
+                <select id="recto_verso" name="recto_verso" class="form-control">
+                    <option value="recto">Recto</option>
+                    <option value="recto-verso">Recto-Verso</option>
+                </select>
+            </div>
+            
 
             {# Couleur Field #}
             <div class="form-group">

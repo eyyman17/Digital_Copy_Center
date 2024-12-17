@@ -38,3 +38,15 @@ class Document(models.Model):
 
     def __str__(self):
         return f"{self.filiere} - {self.n_copies} copies"
+    
+    
+    recto_verso = models.CharField(
+        max_length=20,
+        choices=[('recto', 'Recto'), ('recto-verso', 'Recto-Verso')],
+        default='recto'
+    )
+    document_file = models.FileField(upload_to='documents/')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.professeur.username} - {self.document_file.name}"

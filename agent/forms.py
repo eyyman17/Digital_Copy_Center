@@ -31,13 +31,14 @@ class AgentDocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = ['professeur', 'filiere', 'n_copies', 'impression_pour', 
-                 'departement', 'format', 'couleur', 'document_file']
+                 'departement', 'format', 'couleur', 'document_file','recto_verso']
         widgets = {
             'impression_pour': forms.Select(attrs={'class': 'form-control'}),
             'departement': forms.Select(attrs={'class': 'form-control'}),
             'format': forms.Select(attrs={'class': 'form-control'}),
             'couleur': forms.Select(attrs={'class': 'form-control'}),
             'filiere': forms.TextInput(attrs={'class': 'form-control'}),
+            'recto_verso': forms.Select(attrs={'class': 'form-control'}) ,
             'n_copies': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
         }
 
