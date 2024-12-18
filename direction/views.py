@@ -4,6 +4,10 @@ from django.shortcuts import render, redirect
 from .models import Command, Professor
 from .forms import ProfessorSearchForm, ProfessorCreateForm, ProfessorDeleteForm
 from django.db.models import Q
+from django.core.paginator import Paginator
+from professors.models import Document 
+from .forms import DocumentSearchForm  # Assuming you have a form for filtering the documents
+
 
 @login_required
 def dashboard(request):
@@ -17,8 +21,36 @@ def dashboard(request):
 
 # View for "liste des commandes"
 def command_list(request):
-    commands = Command.objects.all()
-    return render(request, 'command_list.html', {'commands': commands})
+    # Get all documents, or filter based on search criteria
+    documents = Document.objects.all()
+
+    # Apply search filters if present in GET parameters
+    search_query = request.GET.get('search_query', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+    status = request.GET.get('status', '')
+
+    # Apply filtering based on the form inputs
+    if search_query:
+        documents = documents.filter(document_file__icontains=search_query)
+    if date_from:
+        documents = documents.filter(date__gte=date_from)
+    if date_to:
+        documents = documents.filter(date__lte=date_to)
+    if status:
+        documents = documents.filter(validation_impression=status)
+
+    # Paginate the results
+    paginator = Paginator(documents, 10)  # Show 10 documents per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Pass the documents and form to the template
+    context = {
+        'documents': page_obj,
+        'search_form': DocumentSearchForm(request.GET),
+    }
+    return render(request, 'command_list.html', context)
 
 # View for "liste des professeurs"
 def professor_list(request):
@@ -59,3 +91,10 @@ def professor_delete(request):
         form = ProfessorDeleteForm()
 
     return render(request, 'professor_delete.html', {'form': form})
+
+
+def download_document(request, doc_id):
+    document = get_object_or_404(Document, id=doc_id)
+    response = HttpResponse(document.document_file, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
+    return response

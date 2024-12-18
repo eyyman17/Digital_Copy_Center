@@ -20,3 +20,14 @@ class ProfessorCreateForm(forms.ModelForm):
 # Form for deleting a professor (simplified)
 class ProfessorDeleteForm(forms.Form):
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
+
+
+class DocumentSearchForm(forms.Form):
+    search_query = forms.CharField(required=False, label='Search by Name')
+    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), label='From Date')
+    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), label='To Date')
+    status = forms.ChoiceField(
+        choices=[('', 'All'), ('en_attente', 'En Attente'), ('approuve', 'Approuvé'), ('refuse', 'Refusé')],
+        required=False,
+        label='Status'
+    )

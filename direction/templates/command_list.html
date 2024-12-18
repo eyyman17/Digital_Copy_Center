@@ -1,27 +1,155 @@
 {% extends 'dir_base.html' %}
 
-{% block title %}Liste des Commandes{% endblock %}
-
 {% block content %}
-    <h1>Liste des Commandes</h1>
-    <table>
+<h2 class="mb-4">Liste des Commandes</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row">
+            <div class="col-md-3">
+                {{ search_form.search_query }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.date_from }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.date_to }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.status }}
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a href="{% url 'direction:command_list' %}" class="btn btn-secondary">Réinitialiser</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <style>
+        table.table {  /* Targeting the specific table in your content */
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;  /* Ensures cleaner table display */
+        }
+        table.table th, table.table td {
+            text-align: center;
+            vertical-align: middle;  /* Centers content vertically */
+            overflow: hidden;        /* Ensures content doesn't spill outside the cell */
+            white-space: normal;     /* Allows text to wrap onto multiple lines */
+            word-wrap: break-word;   /* Breaks long words to prevent overflow */
+            padding: 10px;           /* Adds padding for spacing inside the cells */
+        }
+
+        /* Center-align table headers and cells */
+        th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        /* Custom styles for status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9em;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        /* Status-specific colors */
+        .status-en_attente {
+            background-color: #FFF3CD;  /* Light yellow */
+            color: #856404;
+            border: 1px solid #FFEEBA;
+        }
+
+        .status-approuve {
+            background-color: #D4EDDA;  /* Light green */
+            color: #155724;
+            border: 1px solid #C3E6CB;
+        }
+
+        .status-refuse {
+            background-color: #F8D7DA;  /* Light pink */
+            color: #721C24;
+            border: 1px solid #F5C6CB;
+        }
+    </style>
+
+    <table class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th>Document</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Date</th>
+                <th style="width: 250px; text-align: center;">Nom du Document</th>
+                <th style="width: 150px; text-align: center;">Professeur</th>
+                <th style="width: 100px; text-align: center;">Impression Pour</th>
+                <th style="width: 110px; text-align: center;">Département</th>
+                <th style="width: 70px; text-align: center;">Filière</th>
+                <th style="width: 100px; text-align: center;">N. de Copies</th>
+                <th style="width: 70px; text-align: center;">Format</th>
+                <th style="width: 70px; text-align: center;">Type d'impression</th>
+                <th style="width: 90px; text-align: center;">Couleur</th>
+                <th style="width: 100px; text-align: center;">Date</th>
+                <th style="width: 120px; text-align: center;">Validation d'impression</th>
             </tr>
         </thead>
+        
         <tbody>
-            {% for command in commands %}
-                <tr>
-                    <td>{{ command.document_name }}</td>
-                    <td>{{ command.description }}</td>
-                    <td>{{ command.get_status_display }}</td>
-                    <td>{{ command.created_at }}</td>
-                </tr>
+            {% for doc in documents %}
+            <tr>
+                <td>
+                    <a href="{% url 'direction:download_document' doc.id %}">
+                        {{ doc.document_file.name|slice:"10:" }}
+                    </a>
+                </td>
+                <td>{{ doc.professeur.get_full_name }}</td>
+                <td>{{ doc.impression_pour }}</td>
+                <td>{{ doc.departement }}</td>
+                <td>{{ doc.filiere }}</td>
+                <td>{{ doc.n_copies }}</td>
+                <td>{{ doc.format }}</td>
+                <td>{{ doc.recto_verso }}</td>
+                <td>{{ doc.couleur }}</td>
+                <td>{{ doc.date|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <span class="status-badge status-{{ doc.validation_impression }}">
+                        {{ doc.get_validation_impression_display }}
+                    </span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="11" class="text-center">Aucun document trouvé.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+{# Pagination, if there are multiple pages #}
+{% if documents.has_other_pages %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if documents.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.previous_page_number }}">Précédent</a>
+            </li>
+        {% endif %}
+
+        {% for num in documents.paginator.page_range %}
+            <li class="page-item {% if documents.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if documents.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ documents.next_page_number }}">Suivant</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
 {% endblock %}
