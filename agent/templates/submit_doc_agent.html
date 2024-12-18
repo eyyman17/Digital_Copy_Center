@@ -127,12 +127,17 @@
 </script>
 
 <script>
+    
     const professeurInput = document.getElementById('id_professeur_name');
     const professeurIdInput = document.getElementById('id_professeur_id');
     const suggestionsContainer = document.getElementById('professor-suggestions');
 
+    console.log("DEBUG: professeurInput =", professeurInput);
+
     professeurInput.addEventListener('input', function() {
+        console.log("DEBUG: JavaScript is loaded");
         const query = this.value;
+        console.log("DEBUG: Query =", query);
         if (query.length >= 2) {  // Start search after typing 2 characters
             fetch(`/agent/search_professor/?q=${query}`)
                 .then(response => response.json())

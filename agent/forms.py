@@ -22,6 +22,7 @@ class AgentDocumentForm(forms.ModelForm):
         else:
             try:
                 cleaned_data['professeur'] = CustomUser.objects.get(id=professeur_id, user_type='professor')
+                
             except CustomUser.DoesNotExist:
                 self.add_error('professeur_name', "Professeur non valide.")
 

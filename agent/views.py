@@ -39,7 +39,12 @@ def agent_dashboard(request):
             documents = documents.filter(date__gte=date_from)
         if date_to:
             documents = documents.filter(date__lte=date_to)
-        
+
+        print("Documents in dashboard:")
+        for doc in documents:
+            print(f"Document ID: {doc.id}, Status: {doc.validation_impression}")
+
+
         # Apply status filter only if it's non-empty
         if status and status in dict(Document.STATUS_CHOICES):
             documents = documents.filter(validation_impression=status)
@@ -59,7 +64,12 @@ def agent_submit(request):
     if request.method == 'POST':
         form = AgentDocumentForm(request.POST, request.FILES)
         if form.is_valid():
+            print("DEBUG: Form is valid")
+        else:
+            print("DEBUG: Form is invalid:", form.errors)
+        if form.is_valid():
             document = form.save(commit=False)
+            document.professeur = form.cleaned_data['professeur']
             document.save()
             
             # Create agent submission record
