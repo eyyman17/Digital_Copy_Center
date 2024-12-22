@@ -11,75 +11,51 @@
     
     {# Custom Styles #}
     <style>
-        /* Base styles */
         body {
             background-color: #f8f9fa;
         }
 
-        /* Custom control styles */
-        .custom-control {
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border: 2px solid #007bff;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 0px;
-            width: 85px;
-            height: 45px;
-            background-color: #ffffff;
-            transition: background-color 0.5s ease;
-        }
-        
-        /* Selected button styling */
-        .custom-control.selected {
-            background-color: #007bff;
-            color: #ffffff;
-        }
-        
-        /* Navbar styling */
         .navbar-custom {
             background-color: #78a8bc;
         }
 
-        .btn-buttons {
-            background-color: #a1c310;
-            color: black;
+        .logo-esith {
+            height: 65px;
+            margin-left: 20px;
         }
 
-        .logo {
-            height: 70px;
-            margin-right: 80px;
+        .logo-ims {
+            height: 65px;
         }
 
         .logout-form {
-            margin: 0;
-            display: inline-flex;
+            margin-right: 50px;
         }
+
     </style>
 </head>
 <body>
     {# Navigation Bar #}
     <nav class="navbar navbar-expand-lg navbar-light navbar-custom">
         <div class="d-flex align-items-center">
-            <img src="{% static 'images/esith_logo.png' %}" alt="ESITH Logo" class="logo">
-            <a class="navbar-brand font-weight-bold" href="{% url 'agent:agent_dashboard' %}">
-                Agent Platform
+            <img src="{% static 'images/esith_logo.png' %}" alt="ESITH Logo" class="logo-esith">
+        </div>
+
+        <div class="mx-auto">
+            <a class="navbar-brand font-weight-bold text-center" href="{% url 'agent:agent_dashboard' %}">
+                Portail Centre Copie
             </a>
         </div>
-        
-        <div class="ml-auto">
-            <a class="btn btn-buttons mr-3" href="{% url 'agent:submit' %}">
-                Submit Document
-            </a>
-            <a class="btn btn-buttons mr-5" href="{% url 'agent:agent_dashboard' %}">
-                Dashboard
-            </a>
+
+        <div class="d-flex align-items-center">
             <form method="post" action="{% url 'accounts:logout' %}" class="logout-form">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">Logout</button>
             </form>
+        </div>
+
+        <div class="d-flex align-items-center">
+            <img src="{% static 'images/IMS real PNG (2).png' %}" alt="IMS Logo" class="logo-ims">
         </div>
     </nav>
 

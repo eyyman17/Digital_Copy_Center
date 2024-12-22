@@ -1,15 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib import messages
-from .forms import AgentDocumentForm, DocumentSearchForm
+from .forms import DocumentSearchForm
 from professors.models import Document
-from .models import AgentSubmission
 from django.core.paginator import Paginator
 from django.db.models import Q
-import uuid
-from django.http import HttpResponse
-from django.utils import timezone
 
+from django.http import HttpResponse
 from django.http import JsonResponse
 from django.db.models import Q
 from accounts.models import CustomUser
@@ -29,21 +25,18 @@ def agent_dashboard(request):
         date_to = search_form.cleaned_data.get('date_to')
         status = search_form.cleaned_data.get('status')
 
+        # Filter by professor's unique email or full name
         if search_query:
             documents = documents.filter(
                 Q(professeur__first_name__icontains=search_query) |
-                Q(professeur__last_name__icontains=search_query)
+                Q(professeur__last_name__icontains=search_query) |
+                Q(professeur__email__icontains=search_query)
             )
         
         if date_from:
             documents = documents.filter(date__gte=date_from)
         if date_to:
             documents = documents.filter(date__lte=date_to)
-
-        print("Documents in dashboard:")
-        for doc in documents:
-            print(f"Document ID: {doc.id}, Status: {doc.validation_impression}")
-
 
         # Apply status filter only if it's non-empty
         if status and status in dict(Document.STATUS_CHOICES):
@@ -60,83 +53,6 @@ def agent_dashboard(request):
 
 @login_required
 @user_passes_test(is_agent)
-def agent_submit(request):
-    if request.method == 'POST':
-        form = AgentDocumentForm(request.POST, request.FILES)
-        if form.is_valid():
-            print("DEBUG: Form is valid")
-        else:
-            print("DEBUG: Form is invalid:", form.errors)
-        if form.is_valid():
-            document = form.save(commit=False)
-            document.professeur = form.cleaned_data['professeur']
-            document.save()
-            
-            # Create agent submission record
-            submission = AgentSubmission.objects.create(
-                document=document,
-                submitted_by=request.user,
-                approval_token=str(uuid.uuid4())
-            )
-            
-            # Try sending an approval email to the professor
-            try:
-                submission.send_approval_email()
-                messages.success(request, 'Document submitted successfully. Awaiting professor approval.')
-            except Exception as e:
-                messages.error(request, f'Document submitted, but approval email failed to send: {e}')
-            
-            return redirect('agent:agent_dashboard')
-    else:
-        form = AgentDocumentForm()
-    
-    return render(request, 'submit_doc_agent.html', {'form': form})
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-
-@login_required
-@user_passes_test(is_agent)
-def approve_document(request, doc_id):
-    document = get_object_or_404(Document, id=doc_id)
-    submission = AgentSubmission.objects.filter(document=document).first()
-    
-    # Check if professor approval is required
-    if submission and not submission.is_approved_by_professor:
-        messages.error(request, 'This document requires professor approval first.')
-    else:
-        document.validation_impression = 'approuve'
-        document.save()
-        messages.success(request, 'Document approved successfully.')
-
-    return redirect('agent:agent_dashboard')
-
-
-def professor_approval(request, token):
-    submission = get_object_or_404(AgentSubmission, approval_token=token)
-    
-    if not submission.is_approved_by_professor:
-        submission.is_approved_by_professor = True
-        submission.document.validation_impression = 'approuve'
-        submission.document.save()
-        submission.save()
-        messages.success(request, 'Document approved successfully.')
-    else:
-        messages.info(request, 'This document has already been approved.')
-
-    return redirect('professors:professor_history')
-
-
-@login_required
-@user_passes_test(is_agent)
-def download_document(request, doc_id):
-    document = get_object_or_404(Document, id=doc_id)
-    response = HttpResponse(document.document_file, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
-    return response
-
-@login_required
-@user_passes_test(is_agent)
 def search_professor(request):
     query = request.GET.get('q', '')
     results = []
@@ -147,3 +63,73 @@ def search_professor(request):
         ).values('id', 'first_name', 'last_name', 'email')[:10]
 
     return JsonResponse(list(results), safe=False)
+
+
+
+@login_required
+@user_passes_test(is_agent)
+def download_document(request, doc_id):
+    document = get_object_or_404(Document, id=doc_id)
+    response = HttpResponse(document.document_file, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
+    return response
+
+from django.shortcuts import get_object_or_404, redirect
+from django.core.mail import send_mail
+from professors.models import Document
+import os
+
+@login_required
+@user_passes_test(is_agent)
+def mark_as_printed(request, document_id):
+    document = get_object_or_404(Document, id=document_id)
+    if request.method == "POST":
+        document.validation_impression = 'imprimé'
+        document.generate_code()
+
+        # Send email to the professor
+        send_mail(
+            subject='Document prêt à être récupéré',  # Subject
+            message="Bonjour {first_name},\nVotre document '{document_name}' a été imprimé et est prêt à être récupéré.\n\n"
+            "Code de retrait : {pickup_code}\n\n"
+            "Veuillez présenter ce code à l'agent au moment de la récupération de votre document.\n\n"
+            "Merci de votre confiance.\nCordialement,\nL'équipe du centre de copie numérique.".format(
+                first_name=document.professeur.first_name,
+                document_name=os.path.basename(document.document_file.name),
+                pickup_code=document.code_validation,
+            ),  # Plain text fallback
+            from_email='noreply@example.com',  # Sender email
+            recipient_list=[document.professeur.email],  # Recipient email
+            fail_silently=False,
+            html_message="""
+            <html>
+            <body>
+                <p>Bonjour {first_name},</p>
+                <p>Votre document '<strong>{document_name}</strong>' a été imprimé et est prêt à être récupéré.</p>
+                <p><strong style="font-size: 14px;">Code de retrait :</strong> <strong style="font-size: 18px;">{pickup_code}</strong></p>
+                <p><strong style="font-size: 14px;">Veuillez présenter ce code à l'agent au moment de la récupération de votre document.</strong></p>
+                <p>Merci de votre confiance.</p>
+                <p>Cordialement,<br>ESITH Centre De Copie</p>
+            </body>
+            </html>
+            """.format(
+                first_name=document.professeur.first_name,
+                document_name=os.path.basename(document.document_file.name),
+                pickup_code=document.code_validation,
+            ),  # HTML content
+        )
+        document.save()
+        return redirect('agent:agent_dashboard')
+
+@login_required
+@user_passes_test(is_agent)
+def validate_and_mark_recupere(request, document_id):
+    document = get_object_or_404(Document, id=document_id)
+    if request.method == "POST":
+        input_code = request.POST.get("validation_code")
+        if input_code == document.code_validation:
+            document.validation_impression = 'recupéré'
+            document.save()
+            return redirect('agent:agent_dashboard')
+        else:
+            return redirect('agent:agent_dashboard')  

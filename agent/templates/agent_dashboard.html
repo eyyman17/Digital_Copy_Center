@@ -1,30 +1,98 @@
 {% extends 'agent_base.html' %}
 
 {% block content %}
-<h2 class="mb-4">Dashboard</h2>
 
-<div class="card mb-4">
+<div class="card mb-3">
     <div class="card-body">
-        <form method="get" class="row">
-            <div class="col-md-3">
-                {{ search_form.search_query }}
+        <form method="get" class="row g-3 justify-content-center">
+            <div class="col-md-3 position-relative">
+                <label for="search_query" class="form-label">Rechercher les documents d'un professeur :</label>
+                <input
+                    type="text"
+                    id="professorSearch"
+                    name="search_query"
+                    class="form-control"
+                    placeholder="Entrer le nom de professeur..."
+                    autocomplete="off"
+                />
+                <!-- Suggestions will be displayed here -->
+                <ul id="suggestions" class="list-group position-absolute" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></ul>
             </div>
+            <!-- Date From -->
             <div class="col-md-2">
+                <label for="date_from" class="form-label">Date de Début:</label>
                 {{ search_form.date_from }}
             </div>
+            <!-- Date To -->
             <div class="col-md-2">
+                <label for="date_to" class="form-label">Date de Fin:</label>
                 {{ search_form.date_to }}
             </div>
+            <!-- Status -->
             <div class="col-md-2">
+                <label for="status" class="form-label">Status:</label>
                 {{ search_form.status }}
             </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-primary">Search</button>
-                <a href="{% url 'agent:agent_dashboard' %}" class="btn btn-secondary">Reset</a>
+            <!-- Buttons -->
+            <div class="col-md-3 d-flex justify-content-around align-items-center">
+                <button type="submit" class="btn btn-primary">Rechercher</button>
+                <a href="{% url 'agent:agent_dashboard' %}" class="btn btn-secondary">Réinitialiser</a>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("professorSearch");
+        const suggestionsBox = document.getElementById("suggestions");
+
+        searchInput.addEventListener("input", function () {
+            const query = this.value;
+
+            if (!query) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            fetch(`/agent/search_professor/?q=${encodeURIComponent(query)}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    suggestionsBox.innerHTML = "";
+
+                    if (data.length > 0) {
+                        suggestionsBox.style.display = "block";
+                        data.forEach((professor) => {
+                            const suggestionItem = document.createElement("li");
+                            suggestionItem.classList.add("list-group-item", "list-group-item-action");
+                            suggestionItem.textContent = `${professor.first_name} ${professor.last_name} (${professor.email})`;
+
+                            // Populate search input with professor email on selection
+                            suggestionItem.addEventListener("click", function () {
+                                searchInput.value = professor.email;  // Use email as unique identifier
+                                suggestionsBox.style.display = "none";
+                            });
+
+                            suggestionsBox.appendChild(suggestionItem);
+                        });
+                    } else {
+                        suggestionsBox.style.display = "none";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching professor suggestions:", error);
+                    suggestionsBox.style.display = "none";
+                });
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    });
+</script>
 
 <div class="table-responsive">
     <style>
@@ -61,22 +129,22 @@
 
         /* Status-specific colors */
         .status-en_attente {
-            background-color: #FFF3CD;  /* Light yellow */
+            background-color: #f8eabe;  /* Light yellow */
             color: #856404;
             border: 1px solid #FFEEBA;
         }
-
-        .status-approuve {
-            background-color: #D4EDDA;  /* Light green */
-            color: #155724;
-            border: 1px solid #C3E6CB;
+        .status-imprimé {
+            background-color: #a7e0b5; /* Light green */
+            color: #155724; /* Dark green text */
+            border: 1px solid #C3E6CB; /* Subtle green border */
         }
 
-        .status-refuse {
-            background-color: #F8D7DA;  /* Light pink */
-            color: #721C24;
-            border: 1px solid #F5C6CB;
+        .status-recupéré {
+            background-color: #D1ECF1; /* Light blue */
+            color: #0C5460; /* Deep blue text */
+            border: 1px solid #BEE5EB; /* Subtle blue border */
         }
+
     </style>
 
     <table class="table table-bordered table-hover">
@@ -89,10 +157,10 @@
                 <th style="width: 70px; text-align: center;">Filière</th>
                 <th style="width: 100px; text-align: center;">N. de Copies</th>
                 <th style="width: 70px; text-align: center;">Format</th>
-                <th style="width: 70px; text-align: center;">Type d'impression</th>
+                <th style="width: 70px; text-align: center;">Recto/Verso</th>
                 <th style="width: 90px; text-align: center;">Couleur</th>
                 <th style="width: 100px; text-align: center;">Date</th>
-                <th style="width: 120px; text-align: center;">Validation d'impression</th>
+                <th style="width: 120px; text-align: center;">Status</th>
                 <th style="width: 120px; text-align: center;">Actions</th>
             </tr>
         </thead>
@@ -111,19 +179,25 @@
                 <td>{{ doc.filiere }}</td>
                 <td>{{ doc.n_copies }}</td>
                 <td>{{ doc.format }}</td>
-                <td>{{ document.recto_verso }}</td>
+                <td>{{ doc.recto_verso }}</td>
                 <td>{{ doc.couleur }}</td>
                 <td>{{ doc.date|date:"d/m/Y H:i" }}</td>
-                <td>
+                <td> 
                     <span class="status-badge status-{{ doc.validation_impression }}">
                         {{ doc.get_validation_impression_display }}
                     </span>
                 </td>
                 <td>
-                    {% if doc.validation_impression == 'en_attente' and not doc.agentsubmission %}
-                        <form method="post" action="{% url 'agent:approve_document' doc.id %}">
+                    {% if doc.validation_impression == 'en_attente' %}
+                        <form method="post" action="{% url 'agent:mark_as_printed' doc.id %}">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                            <button type="submit" class="btn btn-sm btn-success">Imprimé</button>
+                        </form>
+                    {% elif doc.validation_impression == 'imprimé' %}
+                        <form method="post" action="{% url 'agent:validate_and_recupere' doc.id %}">
+                            {% csrf_token %}
+                            <input type="text" name="validation_code" placeholder="Enter Code" class="form-control mb-2" required />
+                            <button type="submit" class="btn btn-sm btn-primary">Recupéré</button>
                         </form>
                     {% endif %}
                 </td>
@@ -137,7 +211,10 @@
     </table>
 </div>
 
+
+
 {# Pagination, if there are multiple pages #}
+
 {% if documents.has_other_pages %}
 <nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
