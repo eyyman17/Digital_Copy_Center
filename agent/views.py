@@ -83,53 +83,75 @@ import os
 @user_passes_test(is_agent)
 def mark_as_printed(request, document_id):
     document = get_object_or_404(Document, id=document_id)
-    if request.method == "POST":
-        document.validation_impression = 'imprimé'
+    
+    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest":
         document.generate_code()
+        
+        # Try sending the email
+        try:
+            send_mail(
+                subject='Document prêt à être récupéré',
+                message=f"""
+                    Bonjour {document.professeur.first_name},
 
-        # Send email to the professor
-        send_mail(
-            subject='Document prêt à être récupéré',  # Subject
-            message="Bonjour {first_name},\nVotre document '{document_name}' a été imprimé et est prêt à être récupéré.\n\n"
-            "Code de retrait : {pickup_code}\n\n"
-            "Veuillez présenter ce code à l'agent au moment de la récupération de votre document.\n\n"
-            "Merci de votre confiance.\nCordialement,\nL'équipe du centre de copie numérique.".format(
-                first_name=document.professeur.first_name,
-                document_name=os.path.basename(document.document_file.name),
-                pickup_code=document.code_validation,
-            ),  # Plain text fallback
-            from_email='noreply@example.com',  # Sender email
-            recipient_list=[document.professeur.email],  # Recipient email
-            fail_silently=False,
-            html_message="""
-            <html>
-            <body>
-                <p>Bonjour {first_name},</p>
-                <p>Votre document '<strong>{document_name}</strong>' a été imprimé et est prêt à être récupéré.</p>
-                <p><strong style="font-size: 14px;">Code de retrait :</strong> <strong style="font-size: 18px;">{pickup_code}</strong></p>
-                <p><strong style="font-size: 14px;">Veuillez présenter ce code à l'agent au moment de la récupération de votre document.</strong></p>
-                <p>Merci de votre confiance.</p>
-                <p>Cordialement,<br>ESITH Centre De Copie</p>
-            </body>
-            </html>
-            """.format(
-                first_name=document.professeur.first_name,
-                document_name=os.path.basename(document.document_file.name),
-                pickup_code=document.code_validation,
-            ),  # HTML content
-        )
+                    Votre document '{os.path.basename(document.document_file.name)}' a été imprimé et est prêt à être récupéré.
+
+                    Code de retrait : {document.code_validation}
+
+                    Veuillez présenter ce code à l'agent au moment de la récupération de votre document.
+
+                    Merci de votre confiance.
+                    Cordialement,
+                    L'équipe du centre de copie numérique.
+                """,
+                from_email='noreply@example.com',
+                recipient_list=[document.professeur.email],
+                html_message=f"""
+                    <html>
+                    <body>
+                        <p>Bonjour {document.professeur.first_name},</p>
+                        <p>Votre document '<strong>{os.path.basename(document.document_file.name)}</strong>' a été imprimé et est prêt à être récupéré.</p>
+                        <p><strong style="font-size: 14px;">Code de retrait :</strong> <strong style="font-size: 18px;">{document.code_validation}</strong></p>
+                        <p>Merci de votre confiance.</p>
+                        <p>Cordialement,<br>ESITH Centre De Copie</p>
+                    </body>
+                    </html>
+                """
+            )
+        except (BadHeaderError, Exception) as e:
+            # If email fails, return an error response
+            return JsonResponse({
+                "success": False,
+                "error": "Failed to send email. Please try again."
+            })
+
+        # Only mark as "imprimé" if the email is sent successfully
+        document.validation_impression = 'imprimé'
         document.save()
-        return redirect('agent:agent_dashboard')
+        return JsonResponse({
+            "success": True,
+            "old_status": "en_attente",
+            "new_status": "imprimé",
+            "new_status_label": "Imprimé"
+        })
+    return JsonResponse({"success": False, "error": "Invalid request."})
 
 @login_required
 @user_passes_test(is_agent)
 def validate_and_mark_recupere(request, document_id):
     document = get_object_or_404(Document, id=document_id)
-    if request.method == "POST":
+    if request.method == "POST" and request.headers.get("X-Requested-With") == "XMLHttpRequest":
         input_code = request.POST.get("validation_code")
         if input_code == document.code_validation:
             document.validation_impression = 'recupéré'
             document.save()
-            return redirect('agent:agent_dashboard')
+            return JsonResponse({
+                "success": True,
+                "old_status": "imprimé",
+                "new_status": "recupéré",
+                "new_status_label": "Récupéré"
+            })
         else:
-            return redirect('agent:agent_dashboard')  
+            return JsonResponse({"success": False, "error": "Invalid validation code."})
+
+    return JsonResponse({"success": False, "error": "Invalid request."})

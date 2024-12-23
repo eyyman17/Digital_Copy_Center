@@ -183,22 +183,40 @@
                 <td>{{ doc.couleur }}</td>
                 <td>{{ doc.date|date:"d/m/Y H:i" }}</td>
                 <td> 
-                    <span class="status-badge status-{{ doc.validation_impression }}">
+                    <span 
+                        class="status-badge status-{{ doc.validation_impression }}" 
+                        data-doc-id="{{ doc.id }}">
                         {{ doc.get_validation_impression_display }}
                     </span>
                 </td>
                 <td>
                     {% if doc.validation_impression == 'en_attente' %}
-                        <form method="post" action="{% url 'agent:mark_as_printed' doc.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm btn-success">Imprimé</button>
-                        </form>
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-success action-button" 
+                            data-action="mark_as_printed" 
+                            data-doc-id="{{ doc.id }}">
+                            Imprimé
+                        </button>
                     {% elif doc.validation_impression == 'imprimé' %}
-                        <form method="post" action="{% url 'agent:validate_and_recupere' doc.id %}">
-                            {% csrf_token %}
-                            <input type="text" name="validation_code" placeholder="Enter Code" class="form-control mb-2" required />
-                            <button type="submit" class="btn btn-sm btn-primary">Recupéré</button>
-                        </form>
+                        <div class="d-flex flex-column align-items-start">
+                            <input 
+                                type="text" 
+                                name="validation_code" 
+                                placeholder="Code" 
+                                class="form-control mb-2 validation-code" 
+                                data-doc-id="{{ doc.id }}" 
+                                required 
+                                style="max-width: 150px;" />
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-primary action-button" 
+                                data-action="validate_and_recupere" 
+                                data-doc-id="{{ doc.id }}" 
+                                style="width: 110px;">
+                                Récupéré
+                            </button>
+                        </div>
                     {% endif %}
                 </td>
             </tr>
@@ -212,6 +230,116 @@
 </div>
 
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Function to handle action buttons dynamically
+        function handleActionButtons() {
+            document.querySelectorAll(".action-button").forEach(button => {
+                button.addEventListener("click", function () {
+                    const action = this.dataset.action; // Action type (e.g., mark_as_printed or validate_and_recupere)
+                    const docId = this.dataset.docId;  // Document ID (from data-doc-id attribute)
+
+                    // Ensure docId is correct
+                    if (!docId) {
+                        console.error("Document ID not found!");
+                        return;
+                    }
+
+                    // Prepare AJAX request URL
+                    const url = action === "mark_as_printed"
+                        ? `/agent/mark-as-printed/${docId}/`
+                        : `/agent/validate-and-recupere/${docId}/`;
+
+                    // Prepare AJAX data
+                    const data = {
+                        csrfmiddlewaretoken: csrfToken,
+                    };
+
+                    if (action === "validate_and_recupere") {
+                        const validationCodeInput = document.querySelector(`.validation-code[data-doc-id="${docId}"]`);
+                        if (validationCodeInput) {
+                            data.validation_code = validationCodeInput.value; // Get the validation code
+                        } else {
+                            alert("Validation code is required.");
+                            return;
+                        }
+                    }
+
+                    // Send AJAX POST request
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: new URLSearchParams(data),
+                    })
+                        .then(response => response.json())
+                        .then(response => {
+                            if (response.success) {
+                                // Update the status badge dynamically for the correct document row
+                                const statusBadge = document.querySelector(`.status-badge[data-doc-id="${docId}"]`);
+                                if (statusBadge) {
+                                    // Update the status badge text and classes
+                                    statusBadge.textContent = response.new_status_label;
+                                    statusBadge.classList.remove(`status-en_attente`, `status-imprimé`, `status-recupéré`);
+                                    statusBadge.classList.add(`status-${response.new_status}`);
+                                }
+
+                                // Update the actions column for the correct row
+                                const actionsCell = document.querySelector(`.action-button[data-doc-id="${docId}"]`).closest("td");
+                                if (actionsCell) {
+                                    if (response.new_status === "imprimé") {
+                                        // Add input field and "Récupéré" button dynamically
+                                        actionsCell.innerHTML = `
+                                            <div class="d-flex flex-column align-items-start">
+                                                <input 
+                                                    type="text" 
+                                                    name="validation_code" 
+                                                    placeholder="Code" 
+                                                    class="form-control mb-2 validation-code" 
+                                                    data-doc-id="${docId}" 
+                                                    required 
+                                                    style="max-width: 150px;" />
+                                                <button 
+                                                    type="button" 
+                                                    class="btn btn-sm btn-primary action-button" 
+                                                    data-action="validate_and_recupere" 
+                                                    data-doc-id="${docId}"
+                                                    style="width: 110px;">
+                                                    Récupéré
+                                                </button>
+                                            </div>
+                                        `;
+
+                                        // Re-attach event listeners for dynamically added buttons
+                                        handleActionButtons();
+                                    } else if (response.new_status === "recupéré") {
+                                        // Clear the actions column when status is "recupéré"
+                                        actionsCell.innerHTML = `
+                                            <span class="text-muted">Completed</span>
+                                        `;
+                                    }
+                                }
+                            } else {
+                                // Handle failure to send email or other errors
+                                alert(response.error || "Failed to update the document status.");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("Failed to update the document status.");
+                        });
+                });
+            });
+        }
+
+        // Attach initial event listeners
+        handleActionButtons();
+    });
+</script>
 
 {# Pagination, if there are multiple pages #}
 
