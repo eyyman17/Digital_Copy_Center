@@ -112,6 +112,7 @@ def mark_as_printed(request, document_id):
                         <p>Bonjour {document.professeur.first_name},</p>
                         <p>Votre document '<strong>{os.path.basename(document.document_file.name)}</strong>' a été imprimé et est prêt à être récupéré.</p>
                         <p><strong style="font-size: 14px;">Code de retrait :</strong> <strong style="font-size: 18px;">{document.code_validation}</strong></p>
+                        <p><strong style="font-size: 14px;">Veuillez présenter ce code à l'agent au moment de la récupération de votre document.</strong>
                         <p>Merci de votre confiance.</p>
                         <p>Cordialement,<br>ESITH Centre De Copie</p>
                     </body>
