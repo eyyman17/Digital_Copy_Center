@@ -175,8 +175,8 @@
                 </td>
                 <td>{{ doc.professeur.get_full_name }}</td>
                 <td>{{ doc.impression_pour }}</td>
-                <td>{{ doc.departement }}</td>
-                <td>{{ doc.filiere }}</td>
+                <td>{{ doc.get_department_abbreviation }}</td>
+                <td>{{ doc.get_filiere_abbreviation }}</td>
                 <td>{{ doc.n_copies }}</td>
                 <td>{{ doc.format }}</td>
                 <td>{{ doc.recto_verso }}</td>

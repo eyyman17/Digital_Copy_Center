@@ -20,36 +20,105 @@ class Document(models.Model):
     impression_pour = models.CharField(max_length=10, choices=IMPRESSION_CHOICES)
 
     DEPARTMENT_CHOICES = [
-        ('Direction', 'Direction'),
-        ('IT', 'IT'),
+        ("Direction d'Étude", "Direction d'Étude (DE)"),
+        ("Direction des Relations d'Entreprises", "Direction des Relations d'Entreprises (DRE)"),
+        ("Recherche & Développement", "Recherche & Développement (R&D)"),
+        ("Direction des Relations Internationales", "Direction des Relations Internationales (DRI)"),
+        ("Laboratoire d'Expertise et de Contrôle", "Laboratoire d'Expertise et de Contrôle (LEC)"),
+        ("Career Center", "Career Center (CC)"),
+        ("Scolarité", "Scolarité (SC)"),
+        ("Administration", "Administration (ADM)"),
+        ("IT", "IT"),
+        ("Direction Générale", "Direction Générale (DG)"),
     ]
-    departement = models.CharField(max_length=10, choices=DEPARTMENT_CHOICES)
+    departement = models.CharField(max_length=50, choices=DEPARTMENT_CHOICES, default="Direction d'Étude")
+
+    DEPARTMENT_ABBREVIATIONS = {
+        "Direction d'Étude": "DE",
+        "Direction des Relations d'Entreprises": "DRE",
+        "Recherche & Développement": "R&D",
+        "Direction des Relations Internationales": "DRI",
+        "Laboratoire d'Expertise et de Contrôle": "LEC",
+        "Career Center": "CC",
+        "Scolarité": "SC",
+        "Administration": "ADM",
+        "IT": "IT",
+        "Direction Générale": "DG",
+    }
+
+    def get_department_abbreviation(self):
+        """Returns the abbreviation for the selected department."""
+        return self.DEPARTMENT_ABBREVIATIONS.get(self.departement, self.departement)
+
+    FILIERE_CHOICES = [
+        ('Informatique & Management des systèmes', 'Informatique & Management des systèmes (IMS)'),
+        ('Génie Industriel Logistique Internationale', 'Génie Industriel Logistique Internationale (GI-LI)'),
+        ('Génie Industriel Textile - Habillement', 'Génie Industriel Textile - Habillement (GI-TH)'),
+        ('Génie Industriel Chef de Produit', 'Génie Industriel Chef de Produit (GI-CP)'),
+        ('Génie Industriel - Tronc commun', 'Génie Industriel - Tronc commun (GI-TC)'),
+        ('Ingénierie des Textiles techniques et Intelligents', 'Ingénierie des Textiles techniques et Intelligents (ITTI)'),
+        ('Chimie et traitements des matériaux', 'Chimie et traitements des matériaux (CTM)'),
+        ('Master Spécialisé Management Produit Textile-Habillement', 'Master Spécialisé Management Produit Textile-Habillement (MS-MPTH)'),
+        ('Master Spécialisé E-logistique', 'Master Spécialisé E-logistique (MS-E-Log)'),
+        ('Master Spécialisé Distribution et Merchandising', 'Master Spécialisé Distribution et Merchandising (MS-DM)'),
+        ('Master Spécialisé Hygiène, Sécurité Et Environnement', 'Master Spécialisé Hygiène, Sécurité Et Environnement (MS-HSE)'),
+        ('Licence Professionnelle Développement En Habillement', 'Licence Professionnelle Développement En Habillement (LP-DH)'),
+        ('Licence Professionnelle Gestion De Production En Habillement', 'Licence Professionnelle Gestion De Production En Habillement (LP-GPH)'),
+        ('Licence Professionnelle Gestion De Production Textile', 'Licence Professionnelle Gestion De Production Textile (LP-GPT)'),
+        ('Licence Professionnelle Gestion De La Chaine Logistique', 'Licence Professionnelle Gestion De La Chaine Logistique (LP-GCL)'),
+        ('Licence Professionnelle Gestion Achat & Sourcing', 'Licence Professionnelle Gestion Achat & Sourcing (LP-GAS)'),
+        ('Cycle Technicien Spécialisé', 'Cycle Technicien Spécialisé (CTS)'),
+        ('RSA (Rien à signaler)', 'RSA (Rien à signaler)'),
+    ]
+    
+    filiere = models.CharField(max_length=255, choices=FILIERE_CHOICES)
+
+    FILIERE_ABBREVIATIONS = {
+        'Informatique & Management des systèmes': 'IMS',
+        'Génie Industriel Logistique Internationale': 'GI-LI',
+        'Génie Industriel Textile - Habillement': 'GI-TH',
+        'Génie Industriel Chef de Produit': 'GI-CP',
+        'Génie Industriel - Tronc commun': 'GI-TC',
+        'Ingénierie des Textiles techniques et Intelligents': 'ITTI',
+        'Chimie et traitements des matériaux': 'CTM',
+        'Master Spécialisé Management Produit Textile-Habillement': 'MS-MPTH',
+        'Master Spécialisé E-logistique': 'MS-E-Log',
+        'Master Spécialisé Distribution et Merchandising': 'MS-DM',
+        'Master Spécialisé Hygiène, Sécurité Et Environnement': 'MS-HSE',
+        'Licence Professionnelle Développement En Habillement': 'LP-DH',
+        'Licence Professionnelle Gestion De Production En Habillement': 'LP-GPH',
+        'Licence Professionnelle Gestion De Production Textile': 'LP-GPT',
+        'Licence Professionnelle Gestion De La Chaine Logistique': 'LP-GCL',
+        'Licence Professionnelle Gestion Achat & Sourcing': 'LP-GAS',
+        'Cycle Technicien Spécialisé': 'CTS',
+        'RSA (Rien à signaler)': 'RSA',
+    }
+
+    def get_filiere_abbreviation(self):
+        """Returns the abbreviation for the selected filiere."""
+        return self.FILIERE_ABBREVIATIONS.get(self.filiere, self.filiere)
 
 
-    filiere = models.CharField(max_length=255)
-
-    n_copies = models.IntegerField()
+    n_copies = models.IntegerField(default=1)
 
 
     FORMAT_CHOICES = [
         ('A4', 'A4'),
         ('A3', 'A3'),
     ]
-    format = models.CharField(max_length=10, choices=FORMAT_CHOICES)
+    format = models.CharField(max_length=10, choices=FORMAT_CHOICES, default='Blanc/Noir')
 
     COLOR_CHOICES = [
         ('Blanc/Noir', 'Blanc/Noir'),
         ('Couleurs', 'Couleurs'),
     ]
-    couleur = models.CharField(max_length=10, choices=COLOR_CHOICES)
+    couleur = models.CharField(max_length=10, choices=COLOR_CHOICES, default='Blanc/Noir')
 
     RECTO_VERSO_CHOICES = [
         ('recto', 'Recto'),
         ('recto-verso', 'Recto-Verso'),
     ]
     recto_verso = models.CharField(max_length=20, choices=RECTO_VERSO_CHOICES, default='recto')
-
-
 
     professeur = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     document_file = models.FileField(upload_to='documents/')

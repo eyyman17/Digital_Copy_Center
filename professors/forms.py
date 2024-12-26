@@ -17,7 +17,7 @@ class DocumentForm(forms.ModelForm):
             'departement': forms.Select(attrs={'class': 'form-control'}),
             'format': forms.Select(attrs={'class': 'form-control'}),
             'couleur': forms.Select(attrs={'class': 'form-control'}),
-            'filiere': forms.TextInput(attrs={'class': 'form-control'}),
+            'filiere': forms.Select(attrs={'class': 'form-control'}),
             'recto_verso': forms.Select(attrs={'class': 'form-control'}) ,
             'n_copies': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
         }
@@ -32,11 +32,3 @@ class DocumentForm(forms.ModelForm):
                 if self.user.first_name or self.user.last_name
                 else self.user.username
             )
-
-        self.fields['format'].initial = 'A4'
-        self.fields['couleur'].initial = 'Blanc/Noir'
-        self.fields['n_copies'].initial = 1
-
-        self.fields['couleur'].choices = [('Blanc/Noir', 'Blanc/Noir'), ('Couleurs', 'Couleurs')]
-        self.fields['format'].choices = [('A4', 'A4'), ('A3', 'A3'),]
-   
