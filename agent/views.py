@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import DocumentSearchForm
 from professors.models import Document
@@ -9,6 +9,10 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.db.models import Q
 from accounts.models import CustomUser
+
+from django.utils import timezone
+from datetime import timedelta
+
 
 def is_agent(user):
     return user.is_authenticated and user.user_type == 'agent'
@@ -42,6 +46,9 @@ def agent_dashboard(request):
         if status and status in dict(Document.STATUS_CHOICES):
             documents = documents.filter(validation_impression=status)
 
+    for document in documents:
+        document.is_downloadable = (timezone.now() - document.date) <= timedelta(days=7)
+
     paginator = Paginator(documents, 10)
     page = request.GET.get('page')
     documents = paginator.get_page(page)
@@ -65,7 +72,6 @@ def search_professor(request):
     return JsonResponse(list(results), safe=False)
 
 
-
 @login_required
 @user_passes_test(is_agent)
 def download_document(request, doc_id):
@@ -74,7 +80,10 @@ def download_document(request, doc_id):
     response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
     return response
 
-from django.shortcuts import get_object_or_404, redirect
+
+
+
+from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from professors.models import Document
 import os
