@@ -3,27 +3,137 @@
 {% block title %}Liste des Professeurs{% endblock %}
 
 {% block content %}
-    <h1>Liste des Professeurs</h1>
-    <form method="get">
-        {{ form.as_p }}
-        <button type="submit">Rechercher</button>
-    </form>
-    <table>
-        <thead>
-            <tr>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Département</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for professor in professors %}
-                <tr>
-                    <td>{{ professor.user.first_name }} {{ professor.user.last_name }}</td>
-                    <td>{{ professor.user.email }}</td>
-                    <td>{{ professor.department }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<h1>Liste des Professeurs</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="input-group">
+            <input
+                type="text"
+                id="professorSearch"
+                class="form-control mr-3"
+                placeholder="Entrer le nom de professeur..."
+                autocomplete="off"
+            />
+            <div class="ms-1">
+                <button class="btn btn-primary" type="button">Rechercher</button>
+                <a href="{% url 'direction:professor_list' %}" class="btn btn-secondary">Réinitialiser</a>
+            </div>
+        </div>
+        <!-- Suggestions will be displayed here -->
+        <ul id="suggestions" class="list-group position-absolute" style="z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></ul>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("professorSearch");
+        const suggestionsBox = document.getElementById("suggestions");
+        const searchButton = document.querySelector(".btn-primary");
+        const tableBody = document.querySelector("table tbody");
+
+        // Event listener for search input to display suggestions
+        searchInput.addEventListener("input", function () {
+            const query = this.value;
+
+            if (!query) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            fetch(`/direction/search_professor/?q=${encodeURIComponent(query)}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    suggestionsBox.innerHTML = "";
+
+                    if (data.length > 0) {
+                        suggestionsBox.style.display = "block";
+                        data.forEach((professor) => {
+                            const suggestionItem = document.createElement("li");
+                            suggestionItem.classList.add("list-group-item", "list-group-item-action");
+                            suggestionItem.textContent = `${professor.first_name} ${professor.last_name} (${professor.email})`;
+
+                            // Populate search input with professor email on selection
+                            suggestionItem.addEventListener("click", function () {
+                                searchInput.value = professor.email; // Use email as unique identifier
+                                suggestionsBox.style.display = "none";
+                            });
+
+                            suggestionsBox.appendChild(suggestionItem);
+                        });
+                    } else {
+                        suggestionsBox.style.display = "none";
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching professor suggestions:", error);
+                    suggestionsBox.style.display = "none";
+                });
+        });
+
+        // Event listener for the "Rechercher" button
+        searchButton.addEventListener("click", function () {
+            const query = searchInput.value;
+
+            if (!query) {
+                alert("Veuillez entrer un nom de professeur pour effectuer une recherche.");
+                return;
+            }
+
+            fetch(`/direction/search_professor/?q=${encodeURIComponent(query)}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    tableBody.innerHTML = ""; // Clear the existing table rows
+
+                    if (data.length > 0) {
+                        data.forEach((professor, index) => {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${professor.first_name} ${professor.last_name}</td>
+                                <td>${professor.email}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    } else {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `<td colspan="3" class="text-center">Aucun professeur trouvé.</td>`;
+                        tableBody.appendChild(row);
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching professor search results:", error);
+                });
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener("click", function (e) {
+            if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+                suggestionsBox.style.display = "none";
+            }
+        });
+    });
+</script>
+
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for professor in professors %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ professor.get_full_name }}</td>
+            <td>{{ professor.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}
