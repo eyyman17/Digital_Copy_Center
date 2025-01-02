@@ -60,6 +60,16 @@ def agent_dashboard(request):
 
 @login_required
 @user_passes_test(is_agent)
+def download_document(request, doc_id):
+    document = get_object_or_404(Document, id=doc_id)
+    response = HttpResponse(document.document_file, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
+    return response
+
+
+
+@login_required
+@user_passes_test(is_agent)
 def search_professor(request):
     query = request.GET.get('q', '')
     results = []
@@ -70,15 +80,6 @@ def search_professor(request):
         ).values('id', 'first_name', 'last_name', 'email')[:10]
 
     return JsonResponse(list(results), safe=False)
-
-
-@login_required
-@user_passes_test(is_agent)
-def download_document(request, doc_id):
-    document = get_object_or_404(Document, id=doc_id)
-    response = HttpResponse(document.document_file, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
-    return response
 
 
 

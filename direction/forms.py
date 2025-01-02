@@ -3,10 +3,29 @@ from django.conf import settings
 from .models import Professor
 from django.contrib.auth.models import User
 from django.contrib.auth import get_user_model
+from professors.models import Document
+
 
 # Form for searching professors
-class ProfessorSearchForm(forms.Form):
-    search_query = forms.CharField(max_length=255, required=False)
+class DocumentSearchForm(forms.Form):
+    search_query = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search by professor name...'})
+    )
+    date_from = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    date_to = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    status = forms.ChoiceField(
+        choices=Document.STATUS_CHOICES + [('', 'Tous')],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
 
 # Form for creating a professor
 class ProfessorCreateForm(forms.ModelForm):
@@ -22,12 +41,3 @@ class ProfessorDeleteForm(forms.Form):
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
 
 
-class DocumentSearchForm(forms.Form):
-    search_query = forms.CharField(required=False, label='Search by Name')
-    date_from = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), label='From Date')
-    date_to = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}), label='To Date')
-    status = forms.ChoiceField(
-        choices=[('', 'All'), ('en_attente', 'En Attente'), ('approuve', 'Approuvé'), ('refuse', 'Refusé')],
-        required=False,
-        label='Status'
-    )

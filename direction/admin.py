@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Command, Professor
+from .models import Professor
 
-admin.site.register(Command)
+
 admin.site.register(Professor)

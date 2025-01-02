@@ -1,15 +1,25 @@
 from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect
-from .models import Command, Professor
-from .forms import ProfessorSearchForm, ProfessorCreateForm, ProfessorDeleteForm
+from .models import Professor
+from .forms import ProfessorCreateForm, ProfessorDeleteForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 from professors.models import Document 
-from .forms import DocumentSearchForm  # Assuming you have a form for filtering the documents
+from .forms import DocumentSearchForm  
+from accounts.models import CustomUser
 
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.http import JsonResponse
+
+
+
+def is_direction(user):
+    return user.is_authenticated and user.user_type == 'direction'
 
 @login_required
+@user_passes_test(is_direction)
 def dashboard(request):
     return render(request, 'dashboard.html')
 
@@ -19,40 +29,65 @@ def dashboard(request):
     return render(request, 'dashboard.html', {'professors': professors, 'commands': commands})
 
 
-# View for "liste des commandes"
+@login_required
+@user_passes_test(is_direction)
 def command_list(request):
-    # Get all documents, or filter based on search criteria
-    documents = Document.objects.all()
+    search_form = DocumentSearchForm(request.GET)
+    documents = Document.objects.all().order_by('-date')
 
-    # Apply search filters if present in GET parameters
-    search_query = request.GET.get('search_query', '')
-    date_from = request.GET.get('date_from', '')
-    date_to = request.GET.get('date_to', '')
-    status = request.GET.get('status', '')
+    if search_form.is_valid():
+        search_query = search_form.cleaned_data.get('search_query')
+        date_from = search_form.cleaned_data.get('date_from')
+        date_to = search_form.cleaned_data.get('date_to')
+        status = search_form.cleaned_data.get('status')
 
-    # Apply filtering based on the form inputs
-    if search_query:
-        documents = documents.filter(document_file__icontains=search_query)
-    if date_from:
-        documents = documents.filter(date__gte=date_from)
-    if date_to:
-        documents = documents.filter(date__lte=date_to)
-    if status:
-        documents = documents.filter(validation_impression=status)
+        # Filter by professor's unique email or full name
+        if search_query:
+            documents = documents.filter(
+                Q(professeur__first_name__icontains=search_query) |
+                Q(professeur__last_name__icontains=search_query) |
+                Q(professeur__email__icontains=search_query)
+            )
+        
+        if date_from:
+            documents = documents.filter(date__gte=date_from)
+        if date_to:
+            documents = documents.filter(date__lte=date_to)
 
-    # Paginate the results
-    paginator = Paginator(documents, 10)  # Show 10 documents per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        # Apply status filter only if it's non-empty
+        if status and status in dict(Document.STATUS_CHOICES):
+            documents = documents.filter(validation_impression=status)
 
-    # Pass the documents and form to the template
-    context = {
-        'documents': page_obj,
-        'search_form': DocumentSearchForm(request.GET),
-    }
-    return render(request, 'command_list.html', context)
 
-# View for "liste des professeurs"
+    paginator = Paginator(documents, 10)
+    page = request.GET.get('page')
+    documents = paginator.get_page(page)
+
+    return render(request, 'command_list.html', {
+        'documents': documents,
+        'search_form': search_form
+    })
+    
+    
+    
+@login_required
+@user_passes_test(is_direction)
+def search_professor(request):
+    query = request.GET.get('q', '')
+    results = []
+    if query:
+        results = CustomUser.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query),
+            user_type='professor'
+        ).values('id', 'first_name', 'last_name', 'email')[:10]
+
+    return JsonResponse(list(results), safe=False)
+
+
+
+
+@login_required
+@user_passes_test(is_direction)
 def professor_list(request):
     form = ProfessorSearchForm(request.GET or None)
     professors = Professor.objects.all()
@@ -67,7 +102,9 @@ def professor_list(request):
 
     return render(request, 'professor_list.html', {'professors': professors, 'form': form})
 
-# View for "creer/supprimer un professeur"
+
+@login_required
+@user_passes_test(is_direction)
 def professor_create(request):
     if request.method == 'POST':
         form = ProfessorCreateForm(request.POST)
@@ -79,7 +116,9 @@ def professor_create(request):
     
     return render(request, 'professor_create.html', {'form': form})
 
-# View for deleting a professor
+
+@login_required
+@user_passes_test(is_direction)
 def professor_delete(request):
     if request.method == 'POST':
         form = ProfessorDeleteForm(request.POST)
@@ -93,6 +132,9 @@ def professor_delete(request):
     return render(request, 'professor_delete.html', {'form': form})
 
 
+
+@login_required
+@user_passes_test(is_direction)
 def download_document(request, doc_id):
     document = get_object_or_404(Document, id=doc_id)
     response = HttpResponse(document.document_file, content_type='application/octet-stream')
