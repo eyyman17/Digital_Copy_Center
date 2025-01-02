@@ -25,8 +25,7 @@ def dashboard(request):
 
 def dashboard(request):
     professors = Professor.objects.all()  # Récupérer tous les professeurs
-    commands = Command.objects.all()      # Récupérer toutes les commandes
-    return render(request, 'dashboard.html', {'professors': professors, 'commands': commands})
+    return render(request, 'dashboard.html', {'professors': professors})
 
 
 @login_required
@@ -89,18 +88,14 @@ def search_professor(request):
 @login_required
 @user_passes_test(is_direction)
 def professor_list(request):
-    form = ProfessorSearchForm(request.GET or None)
-    professors = Professor.objects.all()
-
-    if form.is_valid():
-        search_query = form.cleaned_data.get('search_query')
-        if search_query:
-            professors = professors.filter(
-                Q(user__first_name__icontains=search_query) | Q(user__last_name__icontains=search_query) |
-                Q(user__email__icontains=search_query)
-            )
-
-    return render(request, 'professor_list.html', {'professors': professors, 'form': form})
+    query = request.GET.get('q', '')
+    results = []
+    if query:
+        results = CustomUser.objects.filter(
+            Q(first_name__icontains=query) | Q(last_name__icontains=query) | Q(email__icontains=query),
+            user_type='professor'
+        ).values('id', 'first_name', 'last_name', 'email')[:10]
+    return render(request, 'professor_list.html')
 
 
 @login_required
