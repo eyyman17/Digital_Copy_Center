@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.db.models import Q
 from accounts.models import CustomUser
 
+from django.core.mail import send_mail, BadHeaderError
+
 from django.utils import timezone
 from datetime import timedelta
 

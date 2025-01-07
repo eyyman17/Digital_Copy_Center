@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .models import Professor
 from .forms import AddProfessorForm
 from django.db.models import Q
 from django.core.paginator import Paginator
@@ -15,8 +14,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 
 
-import random
-import string
+
 from django.core.mail import send_mail, BadHeaderError
 
 
@@ -28,10 +26,6 @@ def is_direction(user):
 @user_passes_test(is_direction)
 def dashboard(request):
     return render(request, 'dashboard.html')
-
-def dashboard(request):
-    professors = Professor.objects.all()  # Récupérer tous les professeurs
-    return render(request, 'dashboard.html', {'professors': professors})
 
 
 @login_required
@@ -177,3 +171,15 @@ def add_professor(request):
         form = AddProfessorForm()
     
     return render(request, 'professor_add.html', {'form': form})
+
+
+
+@login_required
+@user_passes_test(is_direction)
+def delete_professor(request, professor_id):
+    
+    if request.method == "DELETE" or (request.method == "POST" and request.POST.get('_method') == 'DELETE'):
+        professor = get_object_or_404(CustomUser, id=professor_id, user_type='professor')
+        professor.delete()
+        return JsonResponse({"success": True, "message": "Professor deleted successfully."})
+    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)

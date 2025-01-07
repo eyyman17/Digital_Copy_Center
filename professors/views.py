@@ -5,7 +5,7 @@ from .forms import DocumentForm
 from .models import Document
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
+from django.urls import reverse
 
 
 @login_required
@@ -22,7 +22,7 @@ def submit_document(request):
             document.professeur = request.user
             document.save()
             messages.success(request, 'Document soumis avec succès!')
-            return redirect('/professors/history/')
+            return redirect(reverse('professors:professor_history'))
         else:
             messages.error(request, 'Erreur lors de la soumission du document.')
     else:
