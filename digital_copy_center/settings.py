@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-*&dau8#b1f+wplz9u!%o5g)9xvlvh$y7v)q21=l1r@ts4*dw-a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ac0c-41-140-246-189.ngrok-free.app']
+ALLOWED_HOSTS = ['.vercel.app','127.0.0.1','.now.sh']
 
 
 
@@ -102,11 +102,11 @@ WSGI_APPLICATION = 'digital_copy_center.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'esithcopycenter',
-        'USER': 'admin',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'HzIZMeHQAvryOwBiNViAYMIYolColrCq',
+        'HOST': 'junction.proxy.rlwy.net',
+        'PORT': '27484',
     }
 }
 
