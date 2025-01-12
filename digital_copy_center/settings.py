@@ -11,10 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+import dj_database_url
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / '.env')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,10 +31,7 @@ DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 
-
-
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,24 +59,24 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-
-# CSRF Settings
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = False
-CSRF_USE_SESSIONS = False
+# Security Settings
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = True
 CSRF_COOKIE_NAME = 'csrftoken'
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.ngrok-free.app',
-]
 
-# Session Settings
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 
+# Security Headers
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_HSTS_SECONDS = 31536000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ROOT_URLCONF = 'digital_copy_center.urls'
-
 
 TEMPLATES = [
     {
@@ -88,37 +90,18 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-            
         },
     },
 ]
 
 WSGI_APPLICATION = 'digital_copy_center.wsgi.application'
 
-
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'esithcopycenter',
-        'USER': 'admin',
-        'PASSWORD': 'password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600),
 }
 
-import dj_database_url
-
-database_url= os.environ.get("DATABASE_URL")
-DATABASES['default'] = dj_database_url.parse(database_url)
-
-
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -134,33 +117,26 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATIC_URL = 'static/'
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-
+# Authentication
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
 
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',  # Custom backend
@@ -171,19 +147,7 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'accounts:redirect_user'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
-
-
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
-
-# Ensure to define STATICFILES_DIRS to include your static directory
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
-from decouple import config
-
-#Email service configuration :
+# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -191,16 +155,10 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-
-
+# Debug Toolbar
 INTERNAL_IPS = [
-    # ...
     "127.0.0.1",
-    # ...
 ]
 
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
