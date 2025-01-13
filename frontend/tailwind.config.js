@@ -6,7 +6,19 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
-      extend: {}, 
+      extend: {
+        colors: {
+          'custom-yellow': '#c3d404',
+          'custom-blue': '#04527a',
+          'custom-light-blue': '#b0cbd4',
+          'custom-dark-blue': '#407c9c',
+          'custom-gray-blue': '#78a8bc',
+          'custom-mid-blue': '#346e8e',
+          'custom-deep-blue': '#043261',
+          'custom-blue-gray': '#2c7494',
+          'custom-teal': '#216c8c',
+        },
+      }, 
   },
   plugins: [],
 };

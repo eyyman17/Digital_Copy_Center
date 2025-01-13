@@ -1,45 +1,69 @@
-import React, { useState } from "react";
-import LoginLayout from "./LoginLayout"; // Import the layout component
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+import LoginLayout from "./LoginLayout";
 import esithLogo from "../assets/esith_logo.png";
 import imsLogo from "../assets/ims_logo.png";
+
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
+
+    const handleRedirect = (userType) => {
+        switch(userType) {
+            case 'agent':
+                navigate('/agent/dashboard');
+                break;
+            case 'direction':
+                navigate('/direction/dashboard');
+                break;
+            case 'professor':
+                navigate('/professor/dashboard');
+                break;
+            default:
+                setErrors({ global: "Type d'utilisateur non valide" });
+        }
+    };
 
     const validateForm = () => {
-        const newErrors = {};
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailPattern.test(email)) {
-            newErrors.email = "S'il vous plaît, mettez une adresse email valide.";
+        if (!email || !password) {
+            setErrors({ global: "Veuillez remplir tous les champs." });
+            return false;
         }
-        if (password.length < 6) {
-            newErrors.password = "Password must be at least 6 characters.";
-        }
-        setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0;
+        return true;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            fetch("/accounts/login/", {
+            fetch(`${API_BASE_URL}/accounts/login/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "X-CSRFToken": getCsrfToken(),
                 },
-                body: JSON.stringify({ username: email, password }),
+                body: JSON.stringify({ 
+                    email: email,
+                    password 
+                }),
             })
                 .then((res) => {
-                    if (res.ok) {
-                        window.location.href = "/accounts/redirect/";
+                    if (!res.ok) {
+                        throw new Error("Failed to log in");
+                    }
+                    return res.json();
+                })
+                .then((data) => {
+                    if (data.success) {
+                        handleRedirect(data.user_type);
                     } else {
                         setErrors({
-                            global: "Identifiants non valides. Veuillez réessayer.",
+                            global: data.error || "Identifiants non valides. Veuillez réessayer.",
                         });
                     }
                 })
@@ -55,59 +79,71 @@ const LoginForm = () => {
 
     return (
         <LoginLayout>
-            <div className="flex justify-center mb-6">
-                <img src={esithLogo} alt="Esith Logo" className="h-20 mr-4" />
+            <div className="flex justify-center mb-4">
+                <img src={esithLogo} alt="Logo Esith" className="h-24" />
             </div>
-            {errors.global && <div className="alert alert-danger">{errors.global}</div>}
-            <form onSubmit={handleSubmit} className="divide-y divide-gray-200">
-                <div className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
-                    <div className="relative">
-                        <input
-                            autoComplete="off"
-                            id="email"
-                            name="email"
-                            type="text"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-sky-500"
-                            placeholder="Email address"
-                        />
-                        <label
-                            htmlFor="email"
-                            className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
-                        >
-                            Email Address
-                        </label>
-                    </div>
-                    <div className="relative">
-                        <input
-                            autoComplete="off"
-                            id="password"
-                            name="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-sky-500"
-                            placeholder="Password"
-                        />
-                        <label
-                            htmlFor="password"
-                            className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
-                        >
-                            Password
-                        </label>
-                    </div>
-                    <div className="relative">
-                        <button
-                            type="submit"
-                            className="bg-cyan-500 text-white rounded-md px-4 py-2 w-full hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                        >
-                            Submit
-                        </button>
-                    </div>
+            {errors.global && <div className="alert alert-danger mb-4">{errors.global}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4 text-gray-700 sm:text-lg sm:leading-7">
+                <div className="relative">
+                    <input
+                        autoComplete="off"
+                        id="email"
+                        name="email"
+                        type="text"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="peer placeholder-transparent h-10 w-64 border-b-2 border-custom-blue text-gray-900 focus:outline-none focus:border-custom-yellow text-base"
+                        placeholder="Adresse email"
+                    />
+                    <label
+                        htmlFor="email"
+                        className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                    >
+                        Adresse Email
+                    </label>
                 </div>
-                <div className="flex ml-20 ">
-                    <img src={imsLogo} alt="IMS Logo" className="h-20" />
+                <div className="relative">
+                    <input
+                        autoComplete="off"
+                        id="password"
+                        name="password"
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="peer placeholder-transparent h-10 w-64 border-b-2 border-custom-blue text-gray-900 focus:outline-none focus:border-custom-yellow text-base"
+                        placeholder="Mot de passe"
+                    />
+                    <label
+                        htmlFor="password"
+                        className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                    >
+                        Mot de Passe
+                    </label>
+                </div>
+                
+                {/* Forgot Password Link */}
+                <div className="flex justify-end mt-2">
+                    <a
+                        href="/accounts/password_reset/"
+                        className="text-sm text-custom-teal hover:text-custom-teal"
+                    >
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+
+                <div className="relative mt-4">
+                    <button
+                        type="submit"
+                        className="bg-custom-yellow text-white rounded-md px-4 py-2 w-full hover:bg-custom-dark-blue focus:outline-none focus:ring-2 focus:ring-custom-yellow mb-10"
+                    >
+                        Se connecter
+                    </button>
+                </div>
+                <div className="flex">
+                        <img className="h-6" />
+                </div>
+                <div className="absolute bottom-8 right-5">
+                    <img src={imsLogo} alt="Logo IMS" className="h-20" />
                 </div>
             </form>
         </LoginLayout>
