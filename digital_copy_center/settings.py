@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*&dau8#b1f+wplz9u!%o5g)9xvlvh$y7v)q21=l1r@ts4*dw-a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ac0c-41-140-246-189.ngrok-free.app']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'direction',
     'agent',
     'professors',
-    'widget_tweaks',
+    'rest_framework',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -55,7 +56,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
+
+#corsheaders
+CORS_ALLOW_ALL_ORIGINS = True
 
 
 # CSRF Settings
@@ -79,7 +84,7 @@ ROOT_URLCONF = 'digital_copy_center.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'frontend/build')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -173,7 +178,7 @@ STATIC_URL = '/static/'
 
 # Ensure to define STATICFILES_DIRS to include your static directory
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'frontend/dist'),
 ]
 
 from decouple import config
@@ -199,3 +204,7 @@ INTERNAL_IPS = [
 
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+
+
+FRONTEND_URL = 'http://localhost:5173'

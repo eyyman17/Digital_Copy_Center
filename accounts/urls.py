@@ -1,22 +1,11 @@
 from django.urls import path
-from django.urls import reverse_lazy
-from django.contrib.auth import views as auth_views
 from . import views
 
 app_name = 'accounts'
 
 urlpatterns = [
-    path('login/', auth_views.LoginView.as_view(
-        template_name='login.html',
-        redirect_authenticated_user=True
-    ), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(
-        next_page='accounts:login'
-    ), name='logout'),
-    path('redirect/', views.redirect_user, name='redirect_user'),
-
-
-    # Password reset URLs
-    path('password_reset/', views.CustomPasswordResetView.as_view(), name='password_reset'),
-    path('reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('login/', views.login_api, name='login_api'),
+    path('logout/', views.logout_api, name='logout_api'),
+    path('password_reset/', views.password_reset_api, name='password_reset_api'),
+    path('password_reset_confirm/<uidb64>/<token>/', views.password_reset_confirm_api, name='password_reset_confirm_api'),
 ]
