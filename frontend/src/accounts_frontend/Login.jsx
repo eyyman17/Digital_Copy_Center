@@ -52,22 +52,24 @@ const LoginForm = () => {
                     password 
                 }),
             })
-                .then((res) => {
-                    if (!res.ok) {
-                        throw new Error("Failed to log in");
-                    }
-                    return res.json();
-                })
-                .then((data) => {
-                    if (data.success) {
-                        handleRedirect(data.user_type);
+                .then(async (res) => {
+                    // Always parse the response JSON, even for non-OK responses
+                    const data = await res.json();
+                    if (res.ok) {
+                        // Backend returned a 200 response with success data
+                        if (data.success) {
+                            handleRedirect(data.user_type); // Redirect to dashboard
+                        } else {
+                            // Backend signaled an issue (e.g., invalid credentials)
+                            setErrors({ global: data.error });
+                        }
                     } else {
-                        setErrors({
-                            global: data.error || "Identifiants non valides. Veuillez réessayer.",
-                        });
+                        // Backend returned a non-OK status (e.g., 400, 404)
+                        setErrors({ global: data.error || "Erreur inattendue. Veuillez réessayer." });
                     }
                 })
                 .catch(() => {
+                    // Handle network or unexpected server issues
                     setErrors({ global: "Erreur de connexion au serveur." });
                 });
         }

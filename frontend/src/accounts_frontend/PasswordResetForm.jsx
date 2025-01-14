@@ -1,5 +1,7 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 import React, { useState } from 'react';
-import LoginLayout from './LoginLayout'; // Reuse the LoginLayout component
+import LoginLayout from './LoginLayout'; 
 import esithLogo from '../assets/esith_logo.png';
 
 const PasswordResetForm = () => {
@@ -11,7 +13,7 @@ const PasswordResetForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        fetch('/accounts/password_reset/', {
+        fetch(`${API_BASE_URL}/accounts/password_reset/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -19,24 +21,26 @@ const PasswordResetForm = () => {
             },
             body: JSON.stringify({ email }),
         })
-            .then((res) => res.json())
-            .then((data) => {
+            .then(async (res) => {
+                const data = await res.json();
                 setLoading(false);
-                if (data.success) {
+
+                if (res.ok) {
                     setSuccessMessage('Le lien de réinitialisation a été envoyé à votre adresse email.');
                     setEmail('');
                 } else {
-                    setErrorMessage(data.error || 'Une erreur s\'est produite.');
+                    setErrorMessage(data.error || 'Une erreur inattendue s\'est produite.');
                 }
             })
             .catch(() => {
                 setLoading(false);
-                setErrorMessage('Une erreur s\'est produite.');
+                setErrorMessage('Erreur de connexion au serveur.');
             });
     };
 
     const getCsrfToken = () => {
-        return document.cookie.split('; ').find((row) => row.startsWith('csrftoken')).split('=')[1];
+        const csrfCookie = document.cookie.split('; ').find((row) => row.startsWith('csrftoken'));
+        return csrfCookie ? csrfCookie.split('=')[1] : null;
     };
 
     return (

@@ -4,8 +4,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.models import User
-from django.utils.http import urlsafe_base64_decode
-from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_str, force_bytes
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
@@ -18,30 +18,26 @@ def login_api(request):
         email = data.get('email') 
         password = data.get('password')
 
-        User = get_user_model()
-        try:
-            user = User.objects.get(email=email)
-            # Authenticate with username and password
-            auth_user = authenticate(request, username=email, password=password)
-            
-            if auth_user is not None:
-                login(request, auth_user)
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Login successful',
-                    'user_type': auth_user.user_type
-                })
-            else:
+        auth_user = authenticate(request, username=email, password=password)
+        if auth_user is not None:
+            login(request, auth_user)
+            return JsonResponse({
+                'success': True,
+                'message': 'Login successful',
+                'user_type': auth_user.user_type
+            })
+        else:
+            User = get_user_model()
+            if User.objects.filter(email=email).exists():
                 return JsonResponse({
                     'success': False,
                     'error': 'Mot de passe incorrect.'
                 }, status=400)
-        except User.DoesNotExist:
             return JsonResponse({
                 'success': False,
                 'error': 'Aucun compte associé à cet email.'
             }, status=400)
-            
+
     return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
@@ -53,30 +49,72 @@ def logout_api(request):
     return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
+
 @csrf_exempt
 def password_reset_api(request):
     if request.method == 'POST':
         try:
+            # Parse request data
             data = json.loads(request.body)
             email = data.get('email')
-
+            
+            # Check if user exists
+            User = get_user_model()
             user = User.objects.filter(email=email).first()
-            if user:
-                token = default_token_generator.make_token(user)
-                uid = user.pk
 
-                reset_link = f"{settings.FRONTEND_URL}/accounts/reset/{uid}/{token}/"
+            if user:
+                # Generate token and link
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                
+                reset_link = f"{settings.FRONTEND_URL}/accounts/password_reset_confirm/{uid}/{token}/"
+                
+                # Custom email content
+                subject = 'ESITH Centre De Copie - Réinitialisation de votre mot de passe'
+                
+                # Plain text message
+                plain_message = f"""
+                Bonjour,
+                Vous avez demandé de réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour procéder à la réinitialisation :
+
+                {reset_link}
+
+                Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail.
+
+                Merci,
+                ESITH Centre De Copie
+                """
+                
+                # HTML message
+                html_message = f"""
+                <html>
+                    <body>
+                        <p>Bonjour,</p>
+                        <p>Vous avez demandé de réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour procéder à la réinitialisation :</p>
+                        <p><a href="{reset_link}">{reset_link}</a></p>
+                        <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail.</p>
+                        <p>Merci,<br>ESITH Centre De Copie</p>
+                    </body>
+                </html>
+                """
+
+                # Send email with HTML content
                 send_mail(
-                    'Password Reset Request',
-                    f'Click the link to reset your password: {reset_link}',
+                    subject,
+                    plain_message.strip(),  # Fallback plain-text message
                     settings.DEFAULT_FROM_EMAIL,
                     [email],
+                    html_message=html_message  # HTML message
                 )
+                
                 return JsonResponse({'success': True, 'message': 'Password reset link sent'})
             return JsonResponse({'success': False, 'error': 'Email not found'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=400)
-    return JsonResponse({'error': 'Invalid method'}, status=405)
+            return JsonResponse({'success': False, 'error': 'An unexpected error occurred'}, status=500)
+    return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
 
 
 @csrf_protect
