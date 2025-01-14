@@ -1,48 +1,59 @@
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import LoginLayout from './LoginLayout'; // Reuse the LoginLayout component
 import esithLogo from '../assets/esith_logo.png';
 
-const PasswordResetConfirm = ({ uid, token }) => {
+const PasswordResetConfirm = () => {
+    const { uid, token } = useParams();
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        if (!newPassword || !confirmPassword) {
+            setErrorMessage('Tous les champs sont requis.');
+            return;
+        }
+    
         if (newPassword !== confirmPassword) {
             setErrorMessage('Les mots de passe ne correspondent pas.');
             return;
         }
-
+    
         setLoading(true);
-        fetch(`/accounts/reset/${uid}/${token}/`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
-            },
-            body: JSON.stringify({
-                new_password1: newPassword,
-                new_password2: confirmPassword,
-            }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setLoading(false);
-                if (data.success) {
-                    setSuccessMessage('Votre mot de passe a été réinitialisé avec succès! Vous pouvez maintenant vous connecter.');
-                    setNewPassword('');
-                    setConfirmPassword('');
-                } else {
-                    setErrorMessage(data.error || 'Une erreur s\'est produite.');
-                }
-            })
-            .catch(() => {
-                setLoading(false);
-                setErrorMessage('Une erreur s\'est produite.');
+        try {
+            const response = await fetch(`${API_BASE_URL}/accounts/password_reset_confirm/${uid}/${token}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({
+                    new_password1: newPassword,
+                    new_password2: confirmPassword,
+                }),
             });
+    
+            const data = await response.json();
+            setLoading(false);
+    
+            if (response.ok) {
+                setSuccessMessage('Votre mot de passe a été réinitialisé avec succès! Vous pouvez maintenant vous connecter.');
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                setErrorMessage(data.error || 'Une erreur s\'est produite.');
+            }
+        } catch (error) {
+            setLoading(false);
+            setErrorMessage('Une erreur s\'est produite lors de la connexion au serveur.');
+        }
     };
 
     const getCsrfToken = () => {
