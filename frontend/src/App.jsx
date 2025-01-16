@@ -8,8 +8,11 @@ import PasswordResetConfirm from "./accounts_frontend/PasswordResetConfirm";
 import DocumentSubmitForm from "./professors_frontend/DocumentSubmitForm";
 import ProfDocHistory from "./professors_frontend/Prof_Doc_History";
 
+import AgentDashboard from "./agent_frontend/AgentDashboard";
+
+
 // Uncomment these when the components are ready
-// import AgentDashboard from "./agents_frontend/AgentDashboard";
+
 // import DirectionDashboard from "./direction_frontend/DirectionDashboard";
 
 // Protected Route Component
@@ -56,6 +59,7 @@ const App = () => {
         <Route  path="/professors/document_submit/"element={<DocumentSubmitForm />}/>
         <Route  path="/professors/document_history/"element={<ProfDocHistory />}/>
 
+        <Route  path="/agent/dashboard/"element={<AgentDashboard />}/>
 
         {/* Professor Routes - Protected 
         <Route

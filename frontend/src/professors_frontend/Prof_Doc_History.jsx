@@ -227,9 +227,9 @@ const ProfDocHistory = () => {
                         <td className="py-4 text-sm" style={{ width: "150px" }}>
                           <div
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs ${
-                              doc.validation_impression === "En attente"
+                              doc.validation_impression === "en_attente"
                                 ? "bg-yellow-200 text-yellow-700"
-                                : doc.validation_impression === "Imprimé"
+                                : doc.validation_impression === "imprimé"
                                 ? "bg-green-200 text-green-700"
                                 : "bg-red-200 text-red-700"
                             }`}
