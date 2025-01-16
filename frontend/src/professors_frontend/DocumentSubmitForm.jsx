@@ -112,17 +112,21 @@ const DocumentSubmitForm = () => {
     setFormData((prevState) => ({ ...prevState, impression_pour: value }));
   };
 
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const submissionData = new FormData();
     for (const key in formData) {
       submissionData.append(key, formData[key]);
     }
-
+    
     try {
-      const response = await axios.post("/api/submit-document", submissionData, {
+      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
+      
+      const response = await axios.post(`${API_BASE_URL}/professors/document_submit/`, submissionData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "X-CSRFToken": csrfToken,
         },
       });
       alert("Document soumis avec succès!");

@@ -15,7 +15,9 @@ const ProfDocHistory = () => {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/professors/documents`);
+        const response = await axios.get(`${API_BASE_URL}/professors/document_history/`, {
+          withCredentials: true, // Ensure credentials like cookies are sent for authentication
+        });
         const sortedDocs = response.data.sort(
           (a, b) => new Date(b.date) - new Date(a.date)
         ); // Default sort by recent
@@ -126,32 +128,35 @@ const ProfDocHistory = () => {
             <table className="min-w-full border-separate border-spacing-y-2">
               <thead className="hidden border-b lg:table-header-group bg-gray-100">
                 <tr>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    Nom du Document
+                  </td>
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Impression Pour
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Département
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Filière
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
-                    Nombre de Copies
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    N. de Copies
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Format
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Recto/Verso
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Couleur
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
                     Date Soumise
                   </td>
-                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6">
-                    Validation
+                  <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    Status
                   </td>
                 </tr>
               </thead>
@@ -160,8 +165,11 @@ const ProfDocHistory = () => {
                   currentDocuments.map((doc) => (
                     <tr
                       key={doc.id}
-                      className="bg-white hover:bg-gray-50 transition"
+                      className="bg-white hover:bg-gray-50 transition text-center"
                     >
+                      <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        {doc.file_name}
+                      </td>
                       <td className="py-4 text-sm text-gray-700 sm:px-6">
                         {doc.impression_pour}
                       </td>

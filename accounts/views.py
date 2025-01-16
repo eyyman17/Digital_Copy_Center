@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -106,20 +106,17 @@ def password_reset_api(request):
                     html_message=html_message  # HTML message
                 )
                 
-                return JsonResponse({'success': True, 'message': 'Password reset link sent'})
-            return JsonResponse({'success': False, 'error': 'Email not found'}, status=404)
+                return JsonResponse({'success': True, 'message': 'Le lien de réinitialisation du mot de passe a été envoyé à votre adresse email.'})
+            return JsonResponse({'success': False, 'error': 'Adresse email introuvable.'}, status=404)
         except json.JSONDecodeError:
             return JsonResponse({'success': False, 'error': 'Invalid JSON format'}, status=400)
         except Exception as e:
-            return JsonResponse({'success': False, 'error': 'An unexpected error occurred'}, status=500)
+            return JsonResponse({'success': False, 'error': 'Une erreur inattendue s\'est produite.'}, status=500)
     return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
 
-import logging
-logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def password_reset_confirm_api(request, uidb64, token):
-    logger.debug(f"Received request: UID={uidb64}, Token={token}")
     if request.method == 'POST':
         try:
             # Parse request body

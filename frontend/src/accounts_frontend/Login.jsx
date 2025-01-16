@@ -23,7 +23,7 @@ const LoginForm = () => {
                 navigate('/direction/dashboard');
                 break;
             case 'professor':
-                navigate('/professor/dashboard');
+                navigate('/professors/document_submit/');
                 break;
             default:
                 setErrors({ global: "Type d'utilisateur non valide" });
@@ -51,10 +51,12 @@ const LoginForm = () => {
                     email: email,
                     password 
                 }),
+                credentials: "include",
             })
                 .then(async (res) => {
                     // Always parse the response JSON, even for non-OK responses
                     const data = await res.json();
+                    console.log("Login response:", data); // Debugging
                     if (res.ok) {
                         // Backend returned a 200 response with success data
                         if (data.success) {
@@ -76,7 +78,10 @@ const LoginForm = () => {
     };
 
     const getCsrfToken = () => {
-        return document.cookie.split("; ").find((row) => row.startsWith("csrftoken")).split("=")[1];
+        const csrfCookie = document.cookie
+            .split("; ")
+            .find((row) => row.startsWith("csrftoken="));
+        return csrfCookie ? csrfCookie.split("=")[1] : "";
     };
 
     return (

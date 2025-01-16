@@ -26,7 +26,7 @@ const PasswordResetForm = () => {
                 setLoading(false);
 
                 if (res.ok) {
-                    setSuccessMessage('Le lien de réinitialisation a été envoyé à votre adresse email.');
+                    setSuccessMessage(data.message);
                     setEmail('');
                 } else {
                     setErrorMessage(data.error || 'Une erreur inattendue s\'est produite.');

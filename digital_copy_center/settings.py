@@ -61,7 +61,7 @@ MIDDLEWARE = [
 
 #corsheaders
 CORS_ALLOW_ALL_ORIGINS = True
-
+CORS_ALLOW_CREDENTIALS = True
 
 # CSRF Settings
 CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
@@ -70,7 +70,7 @@ CSRF_USE_SESSIONS = False
 CSRF_COOKIE_NAME = 'csrftoken'
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.ngrok-free.app',
+    "http://localhost:5173",
 ]
 
 # Session Settings
