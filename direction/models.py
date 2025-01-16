@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import datetime
 
 # Model for Document or Command (to track documents submitted)
 class Command(models.Model):
@@ -24,3 +25,8 @@ class Professor(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+
+
+    
+   

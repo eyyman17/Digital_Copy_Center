@@ -3,11 +3,392 @@
 {% block title %}Tableau de bord{% endblock %}
 
 {% block content %}
-    <section class="dashboard">
-        <h1>Bienvenue sur votre Tableau de bord</h1>
-        
+<div class="container mt-5">
+    <h1 class="text-center">Dashboard des Commandes</h1>
 
-        <h2>Cette page est en cours de developpement. Ca sera disponible bientôt</h2>
+    <!-- Compteurs rapides -->
+    <div class="row text-center my-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Total Commandes</div>
+                <div class="card-body">
+                    <h2>50</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">En Attente</div>
+                <div class="card-body">
+                    <h2>30</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">Validées</div>
+                <div class="card-body">
+                    <h2>20</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Courbe de Tendance -->
+    <div class="card my-4">
+        <div class="card-header text-center">
+            Courbe de Tendance : Évolution des Commandes
+        </div>
+        <div class="card-body">
+            <canvas id="trendLineChart"></canvas>
+        </div>
+    </div>
+
+        <!-- Histogrammes pour Commandes par Département et par Filière -->
+    <div class="row my-4">
+        <!-- Histogramme : Commandes par Département -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    Commandes par Département
+                </div>
+                <div class="card-body">
+                    <canvas id="barChartDepartement"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histogramme : Commandes par Filière -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    Commandes par Filière
+                </div>
+                <div class="card-body">
+                    <canvas id="barChartFiliere"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Graphiques pour gérer les coûts -->
+    <div class="row my-4">
+        <!-- Répartition par Type d'Impression -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center">
+                    Répartition par Type d'Impression
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChartImpression"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Répartition par Couleur -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center">
+                    Répartition par Couleur
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChartCouleur"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparaison Type d'Impression et Couleur -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header text-center">
+                    Comparaison : Impression et Couleur
+                </div>
+                <div class="card-body">
+                    <canvas id="stackedBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('trendLineChart').getContext('2d');
+
+const trendLineChart = new Chart(ctx, {
+    type: 'line', // Type de graphique : courbe
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], // Mois
+        datasets: [
+            {
+                label: 'Commandes 2024',
+                data: [30, 50, 40, 70, 90, 120, 150, 140, 130, 110, 80, 60], // Données fictives
+                borderColor: 'rgba(75, 192, 192, 1)', // Couleur de la ligne
+                backgroundColor: 'rgba(75, 192, 192, 0.2)', // Couleur de remplissage
+                tension: 0.4, // Courbure de la ligne
+                fill: true // Activer le remplissage sous la ligne
+            },
+            {
+                label: 'Commandes 2023',
+                data: [20, 40, 30, 60, 80, 100, 130, 120, 100, 90, 70, 50], // Données fictives
+                borderColor: 'rgba(153, 102, 255, 1)', // Couleur de la ligne
+                backgroundColor: 'rgba(153, 102, 255, 0.2)', // Couleur de remplissage
+                tension: 0.4, // Courbure de la ligne
+                fill: true // Activer le remplissage sous la ligne
+            }
+        ]
+    },
+    options: {
+        responsive: true, // Adaptation au conteneur
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top' // Position de la légende
+            },
+            tooltip: {
+                enabled: true // Activer les info-bulles
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Mois'
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Nombre de Commandes'
+                },
+                beginAtZero: true // Démarrer à zéro
+            }
+        }
+    }
+});
+
+// 1. Histogramme : Commandes par Département
+const ctxDepartement = document.getElementById('barChartDepartement').getContext('2d');
+
+const barChartDepartement = new Chart(ctxDepartement, {
+    type: 'bar',
+    data: {
+        labels: [
+            'DE',
+            'DRE',
+            'R&D',
+            'DRI',
+            'LEC',
+            'CC',
+            'Scolarité (SC)',
+            'Administration (ADM)',
+            'IT',
+            'Direction Générale (DG)'
+        ], // Départements
+        datasets: [
+            {
+                label: 'Commandes',
+                data: [30, 40, 20, 50, 10, 25, 35, 15, 45, 20], // Données fictives
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Départements'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Nombre de Commandes'
+                }
+            }
+        }
+    }
+});
+
+// 2. Histogramme : Commandes par Filière
+const ctxFiliere = document.getElementById('barChartFiliere').getContext('2d');
+
+const barChartFiliere = new Chart(ctxFiliere, {
+    type: 'bar',
+    data: {
+        labels: [
+            'IMS',
+            'GI-LI',
+            'GI-TH',
+            'GI-CP',
+            'GI-TC',
+            'ITTI',
+            'CTM',
+            'MS-MPTH',
+            'MS-E-Log',
+            'MS-DM',
+            'MS-HSE',
+            'LP-DH',
+            'LP-GPH',
+            'LP-GPT',
+            'LP-GCL',
+            'LP-GAS',
+            'CTS',
+            'RSA'
+        ], // Filières
+        datasets: [
+            {
+                label: 'Commandes',
+                data: [15, 25, 35, 20, 30, 40, 10, 50, 45, 25, 30, 20, 15, 35, 25, 30, 10, 5], // Données fictives
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Filières'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Nombre de Commandes'
+                }
+            }
+        }
+    }
+});
+
+
+// 1. Répartition par Type d'Impression
+const ctxImpression = document.getElementById('pieChartImpression').getContext('2d');
+
+const pieChartImpression = new Chart(ctxImpression, {
+    type: 'pie',
+    data: {
+        labels: ['Recto', 'Recto-Verso'], // Types d'impression
+        datasets: [
+            {
+                data: [60, 40], // Données fictives : proportions
+                backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
+                borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top' // Légende en haut
+            }
+        }
+    }
+});
+
+// 2. Répartition par Couleur
+const ctxCouleur = document.getElementById('pieChartCouleur').getContext('2d');
+
+const pieChartCouleur = new Chart(ctxCouleur, {
+    type: 'pie',
+    data: {
+        labels: ['Couleur', 'Noir et Blanc'], // Types de couleurs
+        datasets: [
+            {
+                data: [30, 70], // Données fictives : proportions
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)'],
+                borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)'],
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top' // Légende en haut
+            }
+        }
+    }
+});
+
+// 3. Comparaison Impression et Couleur (Bar Chart Empilé)
+const ctxComparaison = document.getElementById('stackedBarChart').getContext('2d');
+
+const stackedBarChart = new Chart(ctxComparaison, {
+    type: 'bar',
+    data: {
+        labels: ['Recto', 'Recto-Verso'], // Types d'impression
+        datasets: [
+            {
+                label: 'Couleur',
+                data: [20, 10], // Données fictives pour Couleur
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            },
+            {
+                label: 'Noir et Blanc',
+                data: [40, 30], // Données fictives pour Noir et Blanc
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top' // Légende en haut
+            }
+        },
+        scales: {
+            x: {
+                stacked: true, // Activer le mode empilé sur l'axe X
+                title: {
+                    display: true,
+                    text: 'Type d\'Impression'
+                }
+            },
+            y: {
+                stacked: true, // Activer le mode empilé sur l'axe Y
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Nombre de Copies'
+                }
+            }
+        }
+    }
+});
+
+</script>
+
+
+   
+    
+
         
 
         

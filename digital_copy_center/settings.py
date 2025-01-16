@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*&dau8#b1f+wplz9u!%o5g)9xvlvh$y7v)q21=l1r@ts4*dw-a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'ac0c-41-140-246-189.ngrok-free.app']
+ALLOWED_HOSTS = []
 
 
 
@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'agent',
     'professors',
     'widget_tweaks',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -179,8 +180,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+#EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+#EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
 
 MEDIA_URL = '/media/'

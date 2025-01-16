@@ -46,6 +46,11 @@
         .btn-buttons {
             background-color: #a1c310;
             color: black;
+            transition: transform 0.5s ease;
+        }
+
+        .btn-buttons.grow {
+            transform: scale(0.9);
         }
 
         .logo {
@@ -71,7 +76,7 @@
         </div>
         
         <div class="ml-auto">
-            <a class="btn btn-buttons mr-3" href="{% url 'professors:submit_document' %}">
+            <a class="btn btn-buttons mr-3" href="{% url 'professors:submit_document' %}" id="growButton">
                 Formulaire de Commande
             </a>
             <a class="btn btn-buttons mr-5" href="{% url 'professors:professor_history' %}">
@@ -93,5 +98,12 @@
     {# JavaScript Dependencies #}
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.getElementById('growButton').addEventListener('click', function() {
+            this.classList.add('grow');  // La classe reste après clic
+        });
+        
+    </script>
+
 </body>
 </html>

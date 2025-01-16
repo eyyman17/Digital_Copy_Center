@@ -7,6 +7,13 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from professors.models import Document 
 from .forms import DocumentSearchForm  # Assuming you have a form for filtering the documents
+from django.db.models import Count
+from datetime import datetime
+"""from rest_framework.views import APIView
+from rest_framework.response import Response
+from .utils import get_trend_data"""
+import json
+
 
 
 @login_required
@@ -98,3 +105,30 @@ def download_document(request, doc_id):
     response = HttpResponse(document.document_file, content_type='application/octet-stream')
     response['Content-Disposition'] = f'attachment; filename="{document.document_file.name}"'
     return response
+
+
+
+def dashboard(request):
+    # Compter les commandes selon leur statut
+    total_commandes = Command.objects.count()
+    commandes_en_attente = Command.objects.filter(status='en_attente').count()
+    commandes_validees = Command.objects.filter(status='validee').count()
+    
+    
+    # Envoyer les données au template
+    context = {
+        'total_commandes': total_commandes,
+        'commandes_en_attente': commandes_en_attente,
+        'commandes_validees': commandes_validees,
+        
+    }
+
+    return render(request, 'dashboard.html', context)
+
+    
+
+"""class TrendDataAPIView(APIView):
+    def get(self, request):
+        trend_data = get_trend_data()
+        return Response(trend_data)
+    """
