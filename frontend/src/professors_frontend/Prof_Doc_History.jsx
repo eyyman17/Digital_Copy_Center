@@ -148,38 +148,38 @@ const ProfDocHistory = () => {
             </div>
 
             {/* Table Section */}
-            <div className="mt-0 overflow-hidden rounded-xl border shadow">
-              <table className="min-w-full border-separate border-spacing-y-2">
-                <thead className="hidden border-b lg:table-header-group bg-gray-100">
+            <div className="mt-0 overflow-x-auto rounded-xl border shadow">
+              <table className="table-fixed border-separate border-spacing-y-2 min-w-[1200px]">
+                <thead className="border-b bg-gray-100">
                   <tr>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "300px" }}>
                       Nom du Document
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
                       Impression Pour
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
                       Département
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
                       Filière
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
                       N. de Copies
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "80px" }}>
                       Format
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
                       Recto/Verso
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
                       Couleur
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "180px" }}>
                       Date Soumise
                     </td>
-                    <td className="py-4 text-sm font-medium text-gray-500 sm:px-6 text-center">
+                    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
                       Status
                     </td>
                   </tr>
@@ -191,31 +191,31 @@ const ProfDocHistory = () => {
                         key={doc.id}
                         className="bg-white hover:bg-gray-50 transition text-center"
                       >
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700 truncate" style={{ width: "200px" }}>
                           {doc.file_name}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
                           {doc.impression_pour}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
                           {doc.get_department_abbreviation}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
                           {doc.get_filiere_abbreviation}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "120px" }}>
                           {doc.n_copies}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "100px" }}>
                           {doc.format}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
                           {doc.recto_verso}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "120px" }}>
                           {doc.couleur}
                         </td>
-                        <td className="py-4 text-sm text-gray-700 sm:px-6">
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "180px" }}>
                           {new Date(doc.date).toLocaleString("fr-FR", {
                             day: "2-digit",
                             month: "2-digit",
@@ -224,7 +224,7 @@ const ProfDocHistory = () => {
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="py-4 text-sm sm:px-6">
+                        <td className="py-4 text-sm" style={{ width: "150px" }}>
                           <div
                             className={`inline-flex items-center rounded-full px-3 py-1 text-xs ${
                               doc.validation_impression === "En attente"
@@ -242,7 +242,7 @@ const ProfDocHistory = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="9"
+                        colSpan="10"
                         className="py-4 text-center text-sm text-gray-500"
                       >
                         Aucun document soumis pour le moment.

@@ -25,6 +25,7 @@ class DocumentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        self.fields['document_file'].required = True
         
         if self.user:
             self.fields['professeur_display'].initial = (

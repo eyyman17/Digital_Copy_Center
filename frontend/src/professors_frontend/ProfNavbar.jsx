@@ -33,7 +33,7 @@ const Navbar = () => {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          navigate(`${API_BASE_URL}/accounts/login/`); // Redirect to login page
+          navigate(`/accounts/login/`); // Redirect to login page
         } else {
           alert("Logout failed. Please try again.");
         }
