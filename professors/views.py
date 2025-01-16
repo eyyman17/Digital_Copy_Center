@@ -39,11 +39,16 @@ def submit_document(request):
     return JsonResponse({"success": False, "message": "Invalid request method."}, status=405)
 
 
-
+from django.core.paginator import Paginator
 
 @login_required
 def professor_history(request):
     documents = Document.objects.filter(professeur=request.user).order_by('-date')
+    
+    paginator = Paginator(documents, 10)  # 10 documents per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
     documents_data = [
         {
             'id': doc.id,
@@ -61,7 +66,7 @@ def professor_history(request):
             'get_filiere_abbreviation': doc.get_filiere_abbreviation(),
             'get_validation_impression_display': doc.get_validation_impression_display(),
         }
-        for doc in documents
+        for doc in page_obj.object_list
     ]
     return JsonResponse(documents_data, safe=False)
 
