@@ -1,6 +1,9 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+import { getCSRFToken } from '../utils/csrf';
+
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "./ProfNavbar";
 import axios from "axios";
 
@@ -112,25 +115,41 @@ const DocumentSubmitForm = () => {
     setFormData((prevState) => ({ ...prevState, impression_pour: value }));
   };
 
-  
+  const navigate = useNavigate(); // Initialize the navigate function
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const submissionData = new FormData();
     for (const key in formData) {
       submissionData.append(key, formData[key]);
     }
-    
+
     try {
-      const csrfToken = document.querySelector("[name=csrfmiddlewaretoken]").value;
-      
-      const response = await axios.post(`${API_BASE_URL}/professors/document_submit/`, submissionData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRFToken": csrfToken,
+      const csrfToken = getCSRFToken(); // Fetch the CSRF token
+      if (!csrfToken) {
+        throw new Error("CSRF token not found");
+      }
+
+      const response = await axios.post(
+        `${API_BASE_URL}/professors/document_submit/`,
+        submissionData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-CSRFToken": csrfToken, // Pass the CSRF token in the header
+          },
+          withCredentials: true, // Ensure cookies are included for authentication
+        }
+      );
+
+      // Navigate to document_history with the success message
+      navigate("/professors/document_history/", {
+        state: {
+          successMessage: response.data.message, // Pass the success message
         },
       });
-      alert("Document soumis avec succès!");
     } catch (error) {
+      console.error("Error submitting document:", error);
       alert("Erreur lors de la soumission du document.");
     }
   };

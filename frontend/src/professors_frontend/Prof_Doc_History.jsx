@@ -4,7 +4,18 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./ProfNavbar";
 import axios from "axios";
 
+import { useLocation } from "react-router-dom";
+
 const ProfDocHistory = () => {
+
+  const location = useLocation(); // Access the location object
+  const successMessage = location.state?.successMessage; // Retrieve the success message if it exists
+  
+  useEffect(() => {
+    // Scroll to the top when the component loads
+    window.scrollTo(0, 0);
+  }, []);
+
   const [documents, setDocuments] = useState([]);
   const [filteredDocuments, setFilteredDocuments] = useState([]);
   const [startDate, setStartDate] = useState("");
@@ -13,7 +24,7 @@ const ProfDocHistory = () => {
   const [hasNextPage, setHasNextPage] = useState(true);
   const [isLoading, setIsLoading] = useState(true); // New state for loading
   const rowsPerPage = 10;
-
+  
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
@@ -77,6 +88,12 @@ const ProfDocHistory = () => {
           </div>
         ) : (
           <div className="mx-auto mt-6 max-w-screen-xl px-2">
+            {/* Display the success message if it exists */}
+            {successMessage && (
+              <div className="mb-4 p-4 bg-green-100 text-green-800 rounded-lg">
+                {successMessage}
+              </div>
+            )}
             {/* Header Section */}
             <div className="flex flex-wrap items-center justify-between gap-4 bg-gray-100 p-4 rounded-lg">
               {/* Header Title */}
