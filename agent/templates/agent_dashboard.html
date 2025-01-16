@@ -169,9 +169,14 @@
             {% for doc in documents %}
             <tr>
                 <td>
-                    <a href="{% url 'agent:download_document' doc.id %}">
-                        {{ doc.document_file.name|slice:"10:" }}
-                    </a>
+                    {% if doc.is_downloadable %}
+                        <!-- If the document is within 7 days, allow downloading -->
+                        <a href="{% url 'agent:download_document' doc.id %}">
+                            {{ doc.document_file.name|slice:"10:" }}
+                        </a>
+                    {% else %}
+                        <span class="text-muted">{{ doc.document_file.name|slice:"10:" }} </span>
+                    {% endif %}
                 </td>
                 <td>{{ doc.professeur.get_full_name }}</td>
                 <td>{{ doc.impression_pour }}</td>
@@ -214,9 +219,11 @@
                                 data-action="validate_and_recupere" 
                                 data-doc-id="{{ doc.id }}" 
                                 style="width: 110px;">
-                                Récupéré
+                                Récupéré !
                             </button>
                         </div>
+                    {% elif doc.validation_impression == 'recupéré' %}
+                        Finalisé
                     {% endif %}
                 </td>
             </tr>
@@ -246,6 +253,10 @@
                         console.error("Document ID not found!");
                         return;
                     }
+
+                    // Disable the button to prevent multiple clicks
+                    this.disabled = true;
+                    this.innerText = "En cours de traitement...";
 
                     // Prepare AJAX request URL
                     const url = action === "mark_as_printed"
@@ -319,7 +330,7 @@
                                     } else if (response.new_status === "recupéré") {
                                         // Clear the actions column when status is "recupéré"
                                         actionsCell.innerHTML = `
-                                            <span class="text-muted">Completed</span>
+                                            <span class="text-muted">Finalisé</span>
                                         `;
                                     }
                                 }
@@ -331,6 +342,11 @@
                         .catch(error => {
                             console.error("Error:", error);
                             alert("Failed to update the document status.");
+                        })
+                        .finally(() => {
+                            // Re-enable the button after processing
+                            this.disabled = false;
+                            this.innerText = "Imprimé";
                         });
                 });
             });

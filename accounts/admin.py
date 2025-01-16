@@ -11,3 +11,7 @@ class CustomUserAdmin(UserAdmin):
     )
 
 admin.site.register(CustomUser, CustomUserAdmin)
+
+
+from django.contrib.auth.models import Group
+admin.site.unregister(Group)
