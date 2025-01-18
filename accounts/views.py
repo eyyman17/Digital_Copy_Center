@@ -40,7 +40,7 @@ def login_api(request):
     return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
-@csrf_exempt
+
 def logout_api(request):
     if request.method == 'POST':
         logout(request)

@@ -10,10 +10,15 @@ import ProfDocHistory from "./professors_frontend/Prof_Doc_History";
 
 import AgentDashboard from "./agent_frontend/AgentDashboard";
 
+import DirectionDashboard from "./direction_frontend/DirectionDashboard";
+import Direction_Doc_History from "./direction_frontend/Direction_Doc_History";
+import Professors_List from "./direction_frontend/Professors_List";
+import Add_Professor from "./direction_frontend/Add_Professor";
+
+
 
 // Uncomment these when the components are ready
 
-// import DirectionDashboard from "./direction_frontend/DirectionDashboard";
 
 // Protected Route Component
 //const ProtectedRoute = ({ element: Element, allowedRole }) => {
@@ -55,11 +60,22 @@ const App = () => {
           path="/accounts/password_reset_confirm/:uid/:token/" 
           element={<PasswordResetConfirm />} 
         />
+        
 
         <Route  path="/professors/document_submit/"element={<DocumentSubmitForm />}/>
         <Route  path="/professors/document_history/"element={<ProfDocHistory />}/>
 
         <Route  path="/agent/dashboard/"element={<AgentDashboard />}/>
+
+        <Route  path="/direction/dashboard/"element={<DirectionDashboard />}/>
+        <Route  path="/direction/direction_history/"element={<Direction_Doc_History />}/>
+        <Route  path="/direction/professors_list/"element={<Professors_List />}/>
+        <Route  path="/direction/add_professor/"element={<Add_Professor />}/>
+
+
+
+
+
 
         {/* Professor Routes - Protected 
         <Route
