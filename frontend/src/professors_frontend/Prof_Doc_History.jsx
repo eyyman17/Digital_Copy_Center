@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./ProfNavbar";
 import axios from "axios";
 
+
+
 import { useLocation } from "react-router-dom";
 
 const ProfDocHistory = () => {
@@ -224,19 +226,24 @@ const ProfDocHistory = () => {
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="py-4 text-sm" style={{ width: "150px" }}>
-                          <div
-                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs ${
-                              doc.validation_impression === "en_attente"
-                                ? "bg-yellow-200 text-yellow-700"
-                                : doc.validation_impression === "imprimé"
-                                ? "bg-green-200 text-green-700"
-                                : "bg-red-200 text-red-700"
-                            }`}
-                          >
-                            {doc.get_validation_impression_display}
-                          </div>
-                        </td>
+                  
+                        <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
+                              {doc.validation_impression === "en_attente" && (
+                                <span className="px-2 py-1 bg-yellow-200 text-yellow-700 rounded-full">
+                                  En Attente
+                                </span>
+                              )}
+                              {doc.validation_impression === "imprimé" && (
+                                <span className="px-2 py-1 bg-blue-200 text-blue-700 rounded-full">
+                                  Imprimé
+                                </span>
+                              )}
+                              {doc.validation_impression === "recupéré" && (
+                                <span className="px-2 py-1 bg-green-200 text-green-700 rounded-full">
+                                  Récupéré
+                                </span>
+                              )}
+                            </td>
                       </tr>
                     ))
                   ) : (

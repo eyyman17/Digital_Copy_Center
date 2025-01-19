@@ -9,42 +9,59 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const AgentDashboard = () => {
   const [documents, setDocuments] = useState([]);
   const [filteredDocuments, setFilteredDocuments] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");       // Email used for filtering 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 10;
+  
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchDocuments = async (page = 1, filters = {}) => {
+    try {
+      setIsLoading(true);
+  
+      // Adjust endDate to include the entire day
+      const adjustedEndDate = filters.endDate
+        ? new Date(filters.endDate)
+        : null;
+      if (adjustedEndDate) {
+        adjustedEndDate.setDate(adjustedEndDate.getDate() + 1); // Add one day to include the full day
+      }
+  
+      const params = new URLSearchParams({
+        page: page,
+        ...(filters.searchQuery && { search_query: filters.searchQuery }),
+        ...(filters.startDate && { date_from: filters.startDate }),
+        ...(adjustedEndDate && { date_to: adjustedEndDate.toISOString().split('T')[0] }), // Format adjusted endDate
+        ...(filters.status && { status: filters.status }),
+      });
+  
+      const response = await axios.get(
+        `${API_BASE_URL}/agent/dashboard/?${params.toString()}`,
+        { withCredentials: true }
+      );
+  
+      setDocuments(response.data.documents);
+      setFilteredDocuments(response.data.documents);
+      setCurrentPage(response.data.current_page);
+      setTotalPages(response.data.total_pages);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/agent/dashboard/`, {
-          withCredentials: true,
-        });
-        console.log("Documents fetched:", response.data.documents);
-  
-        // Extract the relevant data from the response
-        const { documents, current_page, total_pages } = response.data;
-  
-        setDocuments(documents || []); // Ensure documents is an array
-        setFilteredDocuments(documents || []); // Set filteredDocuments initially to all documents
-        setCurrentPage(current_page || 1); // Set the current page
-      } catch (error) {
-        console.error("Error fetching documents:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
     fetchDocuments();
   }, []);
 
+  // Handle search input changes and fetch suggestions
   const handleSearchChange = async (e) => {
-    const query = e.target.value;
+    const query = e.target.value.trim();
     setSearchQuery(query);
 
     if (!query) {
@@ -53,52 +70,47 @@ const AgentDashboard = () => {
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/agent/search_professor/?q=${encodeURIComponent(query)}`, {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        `${API_BASE_URL}/agent/search_professor/?q=${encodeURIComponent(query)}`,
+        { withCredentials: true }
+      );
       setSuggestions(response.data);
     } catch (error) {
       console.error("Error fetching professor suggestions:", error);
     }
   };
 
-  const handleDateFilter = () => {
-    const filtered = documents.filter((doc) => {
-      const docDate = new Date(doc.date);
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate) : null;
-
-      return (
-        (!start || docDate >= start) &&
-        (!end || docDate <= end) &&
-        (status ? doc.validation_impression === status : true) &&
-        (searchQuery ? doc.professeur.email.includes(searchQuery) : true)
-      );
-    });
-
-    setFilteredDocuments(filtered);
-    setCurrentPage(1);
+  // Handle suggestion selection
+  const handleSuggestionSelect = (professor) => {
+    setSearchQuery(professor.email);                                    // Use the email for search
+    setSuggestions([]);                                                 // Clear the dropdown
   };
 
-  const handlePageChange = async (page) => {
-    if (page > 0 && page <= totalPages) {
-      try {
-        setIsLoading(true);
-        const response = await axios.get(`${API_BASE_URL}/agent/dashboard/?page=${page}`, {
-          withCredentials: true,
-        });
-        const { documents, current_page } = response.data;
-  
-        setDocuments(documents || []);
-        setFilteredDocuments(documents || []);
-        setCurrentPage(current_page || 1);
-      } catch (error) {
-        console.error("Error fetching page:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
+  // Handle search button click
+  const handleSearch = () => {
+    const filters = {
+      searchQuery: searchQuery,
+      startDate: startDate,
+      endDate: endDate,
+      status: status
+    };
+    fetchDocuments(1, filters);
   };
+
+  // Handle page change
+  const handlePageChange = (page) => {
+    const filters = {
+      searchQuery: searchQuery,
+      startDate: startDate,
+      endDate: endDate,
+      status: status
+    };
+    fetchDocuments(page, filters);
+  };
+
+
+
+
 
   const handleSendEmail = async (docId) => {
     try {
@@ -184,16 +196,6 @@ const AgentDashboard = () => {
         }
       };
 
-    
-
-  const totalPages = Math.ceil((filteredDocuments?.length || 0) / rowsPerPage);
-
-  const currentDocuments = Array.isArray(filteredDocuments)
-    ? filteredDocuments.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-      )
-    : [];
 
   return (
     <div className="bg-gray-100 min-h-screen">
@@ -211,20 +213,22 @@ const AgentDashboard = () => {
                 <label htmlFor="professorSearch" className="text-sm font-medium text-gray-900">
                   Rechercher les documents d'un professeur :
                 </label>
+                <div className="relative">
                 <input
                   type="text"
                   id="professorSearch"
                   value={searchQuery}
                   onChange={handleSearchChange}
                   placeholder="Entrer le nom du professeur..."
+                  autoComplete="off"
                   className="p-2 border border-gray-300 rounded-lg text-sm w-80"
                 />
                 {suggestions.length > 0 && (
-                  <ul className="list-group position-absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto w-80">
+                  <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg mt-1 max-h-40 overflow-y-auto w-full">
                     {suggestions.map((professor) => (
                       <li
                         key={professor.id}
-                        onClick={() => setSearchQuery(professor.email)}
+                        onClick={() => handleSuggestionSelect(professor)}
                         className="px-4 py-2 cursor-pointer hover:bg-gray-200"
                       >
                         {professor.first_name} {professor.last_name} ({professor.email})
@@ -232,6 +236,7 @@ const AgentDashboard = () => {
                     ))}
                   </ul>
                 )}
+              </div>
               </div>
 
               <div className="flex flex-wrap gap-4">
@@ -280,7 +285,7 @@ const AgentDashboard = () => {
               </div>
 
               <button
-                onClick={handleDateFilter}
+                onClick={handleSearch}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 transition"
               >
                 Rechercher

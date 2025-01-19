@@ -5,7 +5,7 @@ app_name = 'direction'
 
 urlpatterns = [
     path('dashboard/', views.dashboard, name='direction_dashboard'),
-    path('direction_history/', views.command_list, name='direction_history'),
+    path('direction_history/', views.get_documents, name='direction_history'),
     path('professors_list/', views.professor_list, name='professors_list'),\
     path('add_professor/', views.add_professor, name='add_professor'),
     

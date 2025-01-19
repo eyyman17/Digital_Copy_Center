@@ -4,7 +4,6 @@ from .forms import AddProfessorForm
 from django.db.models import Q
 from django.core.paginator import Paginator
 from professors.models import Document 
-from .forms import DocumentSearchForm  
 from accounts.models import CustomUser
 
 from django.contrib import messages
@@ -13,6 +12,9 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.http import JsonResponse
 
+
+from django.utils import timezone
+from datetime import timedelta
 
 
 from django.core.mail import send_mail, BadHeaderError
@@ -30,41 +32,65 @@ def dashboard(request):
 
 @login_required
 @user_passes_test(is_direction)
-def command_list(request):
-    search_form = DocumentSearchForm(request.GET)
+def get_documents(request):
+    """
+    API endpoint to retrieve documents for the agent dashboard.
+    Supports filtering by search query, date range, and status.
+    """
     documents = Document.objects.all().order_by('-date')
+    search_query = request.GET.get('search_query', '')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    status = request.GET.get('status')
+    page = request.GET.get('page', 1)
+    rows_per_page = 10
 
-    if search_form.is_valid():
-        search_query = search_form.cleaned_data.get('search_query')
-        date_from = search_form.cleaned_data.get('date_from')
-        date_to = search_form.cleaned_data.get('date_to')
-        status = search_form.cleaned_data.get('status')
+    # Apply filters
+    if search_query:
+        documents = documents.filter(
+            Q(professeur__first_name__icontains=search_query) |
+            Q(professeur__last_name__icontains=search_query) |
+            Q(professeur__email__icontains=search_query)
+        )
+    if date_from:
+        documents = documents.filter(date__gte=date_from)
+    if date_to:
+        documents = documents.filter(date__lte=date_to)
+    if status:
+        documents = documents.filter(validation_impression=status)
 
-        # Filter by professor's unique email or full name
-        if search_query:
-            documents = documents.filter(
-                Q(professeur__first_name__icontains=search_query) |
-                Q(professeur__last_name__icontains=search_query) |
-                Q(professeur__email__icontains=search_query)
-            )
-        
-        if date_from:
-            documents = documents.filter(date__gte=date_from)
-        if date_to:
-            documents = documents.filter(date__lte=date_to)
+    # Add is_downloadable field
+    for document in documents:
+        document.is_downloadable = (timezone.now() - document.date) <= timedelta(days=7)
 
-        # Apply status filter only if it's non-empty
-        if status and status in dict(Document.STATUS_CHOICES):
-            documents = documents.filter(validation_impression=status)
+    # Paginate results
+    paginator = Paginator(documents, rows_per_page)
+    paginated_documents = paginator.get_page(page)
 
+    # Serialize documents for JSON response
+    documents_data = [
+        {
+            "id": doc.id,
+            "file_name": doc.document_file.name.split('/')[-1],
+            "professeur": f"{doc.professeur.first_name} {doc.professeur.last_name}",
+            "impression_pour": doc.impression_pour,
+            "departement": doc.get_department_abbreviation(),
+            "filiere": doc.get_filiere_abbreviation(),
+            "n_copies": doc.n_copies,
+            "format": doc.format,
+            "recto_verso": doc.recto_verso,
+            "couleur": doc.couleur,
+            "date": doc.date.isoformat(),
+            "status": doc.get_validation_impression_display(),
+            "is_downloadable": doc.is_downloadable,
+        }
+        for doc in paginated_documents
+    ]
 
-    paginator = Paginator(documents, 10)
-    page = request.GET.get('page')
-    documents = paginator.get_page(page)
-
-    return render(request, 'command_list.html', {
-        'documents': documents,
-        'search_form': search_form
+    return JsonResponse({
+        "documents": documents_data,
+        "current_page": paginated_documents.number,
+        "total_pages": paginator.num_pages,
     })
     
 

@@ -174,18 +174,21 @@ def search_professor(request):
     """
     API endpoint to search for professors by name or email.
     """
-    query = request.GET.get('q', '')
+    query = request.GET.get('q', '').strip()  # Ensure query is stripped of whitespace
     if not query:
         return JsonResponse([], safe=False)
 
-    results = CustomUser.objects.filter(
-        Q(first_name__icontains=query) |
-        Q(last_name__icontains=query) |
-        Q(email__icontains=query),
-        user_type='professor'
-    ).values('id', 'first_name', 'last_name', 'email')[:10]
+    try:
+        results = CustomUser.objects.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(email__icontains=query),
+            user_type='professor'  # Adjust if user_type is an enum or choice field
+        ).values('id', 'first_name', 'last_name', 'email')[:10]
 
-    return JsonResponse(list(results), safe=False)
+        return JsonResponse(list(results), safe=False)
+    except Exception as e:
+        return JsonResponse({'error': 'An error occurred during the search.'}, status=500)
 
 
 @login_required

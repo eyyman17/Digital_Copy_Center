@@ -3,6 +3,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom"; 
 
+import { getCSRFToken } from "../utils/csrf";
+import axios from "axios";
+
 
 import esithLogo from "../assets/esith_logo.png";
 import imsLogo from "../assets/ims_logo.png";
@@ -12,37 +15,36 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
-  const getCSRFToken = () => {
-    const cookieValue = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("csrftoken="))
-      ?.split("=")[1];
-    return cookieValue || "";
-  };
-
   const handleLogout = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/accounts/logout/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": getCSRFToken(), // Include CSRF token
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          navigate(`/accounts/login/`); // Redirect to login page
-        } else {
-          alert("Logout failed. Please try again.");
+      // Get CSRF token
+      const csrfToken = getCSRFToken();
+      if (!csrfToken) {
+        throw new Error("CSRF token not found");
+      }
+  
+      // Send logout request
+      const response = await axios.post(
+        `${API_BASE_URL}/accounts/logout/`, // Adjust the URL if necessary
+        {}, // No body required for logout
+        {
+          headers: {
+            "X-CSRFToken": csrfToken, // Include CSRF token in the headers
+          },
+          withCredentials: true, // Include cookies for session management
         }
+      );
+  
+      if (response.data.success) {
+        // Redirect to login page
+        navigate("/accounts/login/");
       } else {
-        alert("Failed to communicate with the server. Please try again.");
+        console.error("Unexpected response during logout:", response.data);
+        alert("Logout failed. Please try again.");
       }
     } catch (error) {
-      console.error("Logout error:", error);
-      alert("An error occurred during logout.");
+      console.error("Error during logout:", error);
+      alert("An error occurred while logging out. Please try again.");
     }
   };
 

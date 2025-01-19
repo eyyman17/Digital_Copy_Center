@@ -49,7 +49,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="min-h-screen w-64 bg-gray-700 text-white flex flex-col">
+    <div className="w-64 min-h-screen bg-gray-700 text-white flex flex-col z-10 relative">
       {/* Sidebar Header */}
       <div className="mt-10 flex flex-col items-center">
         <img src={esithLogo} alt="Logo Esith" className="w-22 h-20" />
