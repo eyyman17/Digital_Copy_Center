@@ -115,8 +115,8 @@ class Document(models.Model):
     couleur = models.CharField(max_length=10, choices=COLOR_CHOICES, default='Blanc/Noir')
 
     RECTO_VERSO_CHOICES = [
-        ('recto', 'Recto'),
-        ('recto-verso', 'Recto-Verso'),
+        ('Recto', 'Recto'),
+        ('Recto-Verso', 'Recto-Verso'),
     ]
     recto_verso = models.CharField(max_length=20, choices=RECTO_VERSO_CHOICES, default='recto')
 

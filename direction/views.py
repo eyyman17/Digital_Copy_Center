@@ -123,89 +123,165 @@ def search_professor(request):
 
 @login_required
 @user_passes_test(is_direction)
-def professor_list(request):
-    professors = CustomUser.objects.filter(user_type='professor')
-    return render(request, 'professor_list.html', {'professors': professors})
+def professors_list(request):
+    """
+    API endpoint to retrieve the list of professors for the direction dashboard.
+    Supports filtering by search query and pagination.
+    """
+    professors = CustomUser.objects.filter(user_type='professor').order_by('last_name')
+    search_query = request.GET.get('search_query', '')
+    page = request.GET.get('page', 1)
+    rows_per_page = 10
+
+    # Apply search filters
+    if search_query:
+        professors = professors.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    # Paginate results
+    paginator = Paginator(professors, rows_per_page)
+    paginated_professors = paginator.get_page(page)
+
+    # Serialize professors for JSON response
+    professors_data = [
+        {
+            "id": professor.id,
+            "first_name": professor.first_name,
+            "last_name": professor.last_name,
+            "email": professor.email,
+        }
+        for professor in paginated_professors
+    ]
+
+    return JsonResponse({
+        "professors": professors_data,
+        "current_page": paginated_professors.number,
+        "total_pages": paginator.num_pages,
+    })
+
+import json
 
 
-
+from django.db import transaction 
 
 @login_required
 @user_passes_test(is_direction)
 def add_professor(request):
     if request.method == 'POST':
-        form = AddProfessorForm(request.POST)
-        if form.is_valid():
-            try:
-                # Step 1: Save user with form logic
-                user = form.save(commit=True)  # The password and username are set in the form's save() method
-                random_password = user.raw_password  # Access the generated password from the form's save()
+        try:
+            # Parse the JSON payload
+            data = json.loads(request.body)
 
-                # Step 2: Send email with credentials
-                try:
-                    send_mail(
-                        subject='[ESITH CENTRE COPIE] Votre compte a été créé avec succès !',
-                        message=f"""
-                            Bonjour {user.first_name},
+            # Use Django's transaction.atomic to ensure atomicity
+            with transaction.atomic():
+                # Validate data using the AddProfessorForm
+                form = AddProfessorForm(data)
+                if form.is_valid():
+                    # Step 1: Save the user but don't commit the transaction yet
+                    user = form.save(commit=True)  # User will not be persisted if anything goes wrong
+                    random_password = user.raw_password  # Get the generated password
 
-                            Votre compte a été créé avec succès. Vous pouvez vous connecter avec les informations suivantes :
+                    # Step 2: Attempt to send the email
+                    try:
+                        send_mail(
+                            subject='[ESITH CENTRE COPIE] Votre compte a été créé avec succès !',
+                            message=f"""
+                                Bonjour {user.first_name},
 
-                            Email : {user.email}
-                            Mot de passe : {random_password}
+                                Votre compte a été créé avec succès. Vous pouvez vous connecter avec les informations suivantes :
 
-                            Si vous le souhaitez, vous avez la possibilité de modifier votre mot de passe en cliquant sur "Mot de passe oublié" depuis la page de connexion.
+                                Email : {user.email}
+                                Mot de passe : {random_password}
 
-                            Merci de votre confiance.
-                            
-                            Cordialement,
-                            L'équipe du Centre de Copie Numérique de l'ESITH.
-                        """,
-                        from_email='noreply@example.com',
-                        recipient_list=[user.email],
-                        html_message=f"""
-                            <html>
-                            <body>
-                                <p>Bonjour {user.first_name},</p>
-                                <p>Votre compte a été créé avec succès. Vous pouvez vous connecter avec les informations suivantes :</p>
-                                <ul>
-                                    <li><strong>Email :</strong> {user.email}</li>
-                                    <li><strong>Mot de passe :</strong> {random_password}</li>
-                                </ul>
-                                <p>Si vous le souhaitez, vous avez la possibilité de modifier votre mot de passe en cliquant sur <strong>"Mot de passe oublié"</strong> depuis la page de connexion.</p>
-                                <p>Merci de votre confiance.</p>
-                                <p>Cordialement,<br><strong>ESITH Centre De Copie</strong></p>
-                            </body>
-                            </html>
-                        """
+                                Si vous le souhaitez, vous avez la possibilité de modifier votre mot de passe en cliquant sur "Mot de passe oublié" depuis la page de connexion.
+
+                                Merci de votre confiance.
+
+                                Cordialement,
+                                L'équipe du Centre de Copie Numérique de l'ESITH.
+                            """,
+                            from_email='noreply@example.com',
+                            recipient_list=[user.email],
+                            html_message=f"""
+                                <html>
+                                <body>
+                                    <p>Bonjour {user.first_name},</p>
+                                    <p>Votre compte a été créé avec succès. Vous pouvez vous connecter avec les informations suivantes :</p>
+                                    <ul>
+                                        <li><strong>Email :</strong> {user.email}</li>
+                                        <li><strong>Mot de passe :</strong> {random_password}</li>
+                                    </ul>
+                                    <p>Si vous le souhaitez, vous avez la possibilité de modifier votre mot de passe en cliquant sur <strong>"Mot de passe oublié"</strong> depuis la page de connexion.</p>
+                                    <p>Merci de votre confiance.</p>
+                                    <p>Cordialement,<br><strong>ESITH Centre De Copie</strong></p>
+                                </body>
+                                </html>
+                            """
+                        )
+                    except (BadHeaderError, Exception) as e:
+                        # If email fails, raise an exception to trigger a rollback
+                        raise Exception("Email sending failed: " + str(e))
+
+                    # Step 3: If the email is sent successfully, commit the transaction
+                    return JsonResponse(
+                        {"message": "Professeur ajouté avec succès !"},
+                        status=201
                     )
-                    print("Email sent successfully.")
-                    messages.success(request, "Le professeur a été ajouté avec succès! Un email contenant le mot de passe a été envoyé.")
-                except (BadHeaderError, Exception) as e:
-                    print(f"Error sending email: {e}")
-                    messages.error(request, "Erreur lors de l'envoi de l'email au professeur. Veuillez réessayer.")
+                else:
+                    # If the form is invalid, return form validation errors
+                    return JsonResponse(
+                        {"errors": form.errors},
+                        status=400
+                    )
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"errors": {"global": "Invalid JSON payload."}},
+                status=400
+            )
+        except Exception as e:
+            # Catch all other exceptions (e.g., email errors, transaction errors)
+            return JsonResponse(
+                {"errors": {"global": f"Une erreur est survenue: {str(e)}"}},
+                status=500
+            )
 
-                # Step 3: Redirect to professor list
-                return redirect('direction:professor_list')
-
-            except Exception as e:
-                print(f"Error during professor creation: {e}")
-                messages.error(request, "Une erreur est survenue lors de la création du professeur.")
-        else:
-            print(f"Form errors: {form.errors}")
-            messages.error(request, "Erreur lors de l'ajout du professeur.")
-    else:
-        form = AddProfessorForm()
-    
-    return render(request, 'professor_add.html', {'form': form})
+    return JsonResponse({"errors": {"global": "Invalid HTTP method."}}, status=405)
 
 
+from django.views.decorators.http import require_http_methods
 
 @login_required
 @user_passes_test(is_direction)
+@require_http_methods(["DELETE"])
 def delete_professor(request, professor_id):
-    
-    if request.method == "DELETE" or (request.method == "POST" and request.POST.get('_method') == 'DELETE'):
+    """
+    View to handle the deletion of a professor by ID.
+    Accepts only DELETE requests from users with 'direction' access.
+    """
+    try:
+        # Fetch the professor object (only user_type 'professor' allowed)
         professor = get_object_or_404(CustomUser, id=professor_id, user_type='professor')
+        
+        # Delete the professor
         professor.delete()
-        return JsonResponse({"success": True, "message": "Professor deleted successfully."})
-    return JsonResponse({"success": False, "message": "Invalid request method."}, status=400)
+        
+        # Return success response
+        return JsonResponse({
+            "success": True,
+            "message": "Professeur supprimé avec succès."
+        }, status=200)
+    except CustomUser.DoesNotExist:
+        # Handle case where the professor doesn't exist
+        return JsonResponse({
+            "success": False,
+            "message": "Le professeur n'existe pas."
+        }, status=404)
+    except Exception as e:
+        # Handle unexpected errors
+        return JsonResponse({
+            "success": False,
+            "message": f"Une erreur s'est produite : {str(e)}"
+        }, status=500)

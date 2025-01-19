@@ -16,6 +16,7 @@ const AgentDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [suggestions, setSuggestions] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loadingButton, setLoadingButton] = useState({});
   
   const [totalPages, setTotalPages] = useState(1);
 
@@ -113,6 +114,7 @@ const AgentDashboard = () => {
 
 
   const handleSendEmail = async (docId) => {
+    setLoadingButton((prev) => ({ ...prev, [docId]: true }));
     try {
       const csrfToken = getCSRFToken(); // Fetch the CSRF token
       await axios.post(
@@ -125,7 +127,7 @@ const AgentDashboard = () => {
           },
         }
       );
-      alert("Email envoyé avec succès !");
+      // alert("Email envoyé avec succès !");
       // Update the status dynamically in state
       setDocuments((prevDocuments) =>
         prevDocuments.map((doc) =>
@@ -143,6 +145,8 @@ const AgentDashboard = () => {
       );
     } catch (error) {
       console.error("Erreur lors de l'envoi de l'email:", error);
+    } finally {
+      setLoadingButton((prev) => ({ ...prev, [docId]: false })); // Reset loading state
     }
   };
 
@@ -156,7 +160,8 @@ const AgentDashboard = () => {
     };
 
   
-    const handleValidateCode = async (docId) => {
+const handleValidateCode = async (docId) => {
+  setLoadingButton((prev) => ({ ...prev, [docId]: true })); // Set loading state
         try {
           const csrfToken = getCSRFToken(); // Fetch the CSRF token
           const enteredCode = codes[docId];
@@ -172,7 +177,7 @@ const AgentDashboard = () => {
           );
       
           if (response.data.success) {
-            alert("Code validé avec succès !");
+            // alert("Code validé avec succès !");
             // Update the status dynamically in state
             setDocuments((prevDocuments) =>
               prevDocuments.map((doc) =>
@@ -193,8 +198,10 @@ const AgentDashboard = () => {
           }
         } catch (error) {
           console.error("Erreur lors de la validation du code:", error);
+        } finally {
+          setLoadingButton((prev) => ({ ...prev, [docId]: false })); // Reset loading state
         }
-      };
+  };
 
 
   return (
@@ -295,43 +302,46 @@ const AgentDashboard = () => {
             {/* Table Section */}
             <div className="mt-2 overflow-x-auto rounded-xl border shadow">
                 <table className="table-fixed border-separate border-spacing-y-2 min-w-[1200px]">
-                    <thead className="border-b bg-gray-100">
-                    <tr>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
-                        Nom du Document
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "200px" }}>
-                        Professeur
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "70px" }}>
-                        Impression Pour
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "70px" }}>
-                        Département
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
-                        Filière
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
-                        N. de Copies
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "100px" }}>
-                        Format
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
-                        Recto/Verso
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
-                        Couleur
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
-                        Date Soumise
-                        </td>
-                        <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
-                        Status
-                        </td>
-                    </tr>
-                    </thead>
+                <thead className="border-b bg-gray-100">
+  <tr>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
+      Nom du Document
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "200px" }}>
+      Professeur
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "70px" }}>
+      Impression Pour
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "70px" }}>
+      Département
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
+      Filière
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
+      N. de Copies
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "100px" }}>
+      Format
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "50px" }}>
+      Recto/Verso
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
+      Couleur
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
+      Date Soumise
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "150px" }}>
+      Status
+    </td>
+    <td className="py-4 text-sm font-medium text-gray-500 text-center" style={{ width: "120px" }}>
+      Télécharger
+    </td>
+  </tr>
+</thead>
                     <tbody>
                     {filteredDocuments.length > 0 ? (
                         filteredDocuments.map((doc) => (
@@ -376,38 +386,59 @@ const AgentDashboard = () => {
                             })}
                             </td>
                             <td className="py-4 text-sm text-gray-700" style={{ width: "150px" }}>
-                                {doc.status === "En attente" && (
-                                    <div className="flex flex-col items-center">
-                                    <button
-                                        className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition w-full mb-2"
-                                        onClick={() => handleSendEmail(doc.id)}
-                                    >
-                                        Imprimé
-                                    </button>
-                                    </div>
-                                )}
-                                {doc.status === "Imprimé" && (
-                                    <div className="flex flex-col items-center">
-                                    <input
-                                        type="text"
-                                        placeholder="Entrer le code"
-                                        className="p-1 border border-gray-300 rounded-md text-sm mb-2 w-full"
-                                        onChange={(e) => handleCodeInputChange(e, doc.id)}
-                                    />
-                                    <button
-                                        className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-500 transition w-full"
-                                        onClick={() => handleValidateCode(doc.id)}
-                                    >
-                                        Récupéré
-                                    </button>
-                                    </div>
-                                )}
+                            {doc.status === "En attente" && (
+                                <div className="flex flex-col items-center">
+                                  <button
+                                    className={`px-3 py-1 rounded-md w-full mb-2 ${
+                                      loadingButton[doc.id]
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-blue-600 hover:bg-blue-500 text-white"
+                                    }`}
+                                    onClick={() => handleSendEmail(doc.id)}
+                                    disabled={loadingButton[doc.id]} // Disable button while loading
+                                  >
+                                    {loadingButton[doc.id] ? "Envoi..." : "Imprimé"}
+                                  </button>
+                                </div>
+                              )}
+                              {doc.status === "Imprimé" && (
+                                <div className="flex flex-col items-center">
+                                  <input
+                                    type="text"
+                                    placeholder="Entrer le code"
+                                    className="p-1 border border-gray-300 rounded-md text-sm mb-2 w-full"
+                                    onChange={(e) => handleCodeInputChange(e, doc.id)}
+                                  />
+                                  <button
+                                    className={`px-3 py-1 rounded-md w-full ${
+                                      loadingButton[doc.id]
+                                        ? "bg-gray-400 cursor-not-allowed"
+                                        : "bg-green-600 hover:bg-green-500 text-white"
+                                    }`}
+                                    onClick={() => handleValidateCode(doc.id)}
+                                    disabled={loadingButton[doc.id]} // Disable button while loading
+                                  >
+                                    {loadingButton[doc.id] ? "Validation..." : "Récupéré"}
+                                  </button>
+                                </div>
+                              )}
                                 {doc.status === "Recupéré" && (
                                     <div className="text-center">
                                     <span>Récupéré</span>
                                     </div>
                                 )}
                                 </td>
+                                <td className="py-4 text-sm text-gray-700 text-center" style={{ width: "120px" }}>
+                              {/* Download button here */}
+                              <a
+                                href={`${API_BASE_URL}/professors/download_document/${doc.id}/`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition"
+                              >
+                                Télécharger
+                              </a>
+                            </td>
                         </tr>
                         ))
                     ) : (

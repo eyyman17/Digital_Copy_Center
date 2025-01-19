@@ -71,7 +71,7 @@ const Direction_Doc_History = () => {
 
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/agent/search_professor/?q=${encodeURIComponent(query)}`,
+        `${API_BASE_URL}/direction/search_professor/?q=${encodeURIComponent(query)}`,
         { withCredentials: true }
       );
       setSuggestions(response.data);
@@ -111,7 +111,6 @@ const Direction_Doc_History = () => {
 return (
     <DirectionLayout pageTitle="Historique des Documents">
       <div className="bg-gray-100 min-h-screen">
-      
         {isLoading ? (
           <div className="flex justify-center items-center min-h-screen">
             <div className="loader animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>

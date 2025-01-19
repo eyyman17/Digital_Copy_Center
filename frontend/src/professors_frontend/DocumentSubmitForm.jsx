@@ -52,7 +52,7 @@ const DocumentSubmitForm = () => {
     filiere: "",
     n_copies: 1,
     format: "A4",
-    recto_verso: "recto",
+    recto_verso: "Recto",
     couleur: "Blanc/Noir",
     document_file: null,
   });
@@ -64,7 +64,6 @@ const DocumentSubmitForm = () => {
   useEffect(() => {
     const fetchProfessorName = async () => {
       try {
-        console.log("API_BASE_URL:", API_BASE_URL);
         const response = await axios.get(`${API_BASE_URL}/professors/current-professor/`, {
           withCredentials: true,
         });
@@ -123,33 +122,30 @@ const DocumentSubmitForm = () => {
     for (const key in formData) {
       submissionData.append(key, formData[key]);
     }
-
+  
     try {
-      const csrfToken = getCSRFToken(); // Fetch the CSRF token
+      const csrfToken = getCSRFToken();
       if (!csrfToken) {
         throw new Error("CSRF token not found");
       }
-
+  
       const response = await axios.post(
         `${API_BASE_URL}/professors/document_submit/`,
         submissionData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            "X-CSRFToken": csrfToken, // Pass the CSRF token in the header
+            "X-CSRFToken": csrfToken,
           },
-          withCredentials: true, // Ensure cookies are included for authentication
+          withCredentials: true,
         }
       );
-
-      // Navigate to document_history with the success message
+  
       navigate("/professors/document_history/", {
-        state: {
-          successMessage: response.data.message, // Pass the success message
-        },
+        state: { successMessage: response.data.message },
       });
     } catch (error) {
-      console.error("Error submitting document:", error);
+      console.error("Error submitting document:", error.response?.data || error);
       alert("Erreur lors de la soumission du document.");
     }
   };
@@ -238,41 +234,77 @@ const DocumentSubmitForm = () => {
               </select>
             </div>
 
-            {/* Remaining Form Fields */}
-            {[{ name: "n_copies", label: "Nombre de Copies:", type: "number", min: 1 },
-              { name: "format", label: "Format:", options: FORMAT_CHOICES },
-              { name: "recto_verso", label: "Type d'impression:", options: RECTO_VERSO_CHOICES },
-              { name: "couleur", label: "Couleur:", options: COLOR_CHOICES },
-            ].map((field) => (
-              <div key={field.name}>
+            {/* Nombre de Copies and Format */}
+            <div className="flex space-x-4">
+              <div className="w-1/2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {field.label}
+                  Nombre de Copies:
                 </label>
-                {field.type ? (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    value={formData[field.name]}
-                    onChange={handleInputChange}
-                    min={field.min}
-                    className="w-full p-2 border rounded-lg"
-                  />
-                ) : (
-                  <select
-                    name={field.name}
-                    value={formData[field.name]}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border rounded-lg"
-                  >
-                    {field.options.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                )}
+                <input
+                  type="number"
+                  name="n_copies"
+                  value={formData.n_copies}
+                  onChange={handleInputChange}
+                  min={1}
+                  className="w-full p-2 border rounded-lg"
+                />
               </div>
-            ))}
+              <div className="w-1/2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Format:
+                </label>
+                <select
+                  name="format"
+                  value={formData.format}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  {FORMAT_CHOICES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Type d'impression and Couleur */}
+            <div className="flex space-x-4 mt-4">
+              <div className="w-1/2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type d'impression:
+                </label>
+                <select
+                  name="recto_verso"
+                  value={formData.recto_verso}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  {RECTO_VERSO_CHOICES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-1/2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Couleur:
+                </label>
+                <select
+                  name="couleur"
+                  value={formData.couleur}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  {COLOR_CHOICES.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             {/* Document Upload */}
             <div>
