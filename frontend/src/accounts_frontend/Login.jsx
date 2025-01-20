@@ -7,6 +7,9 @@ import imsLogo from "../assets/ims_logo.png";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { getCSRFToken } from '../utils/csrf';
+
+import api from '../api/axios';
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
@@ -38,51 +41,34 @@ const LoginForm = () => {
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (validateForm()) {
-            fetch(`${API_BASE_URL}/accounts/login/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCsrfToken(),
-                },
-                body: JSON.stringify({ 
-                    email: email,
-                    password 
-                }),
-                credentials: "include",
-            })
-                .then(async (res) => {
-                    // Always parse the response JSON, even for non-OK responses
-                    const data = await res.json();
-                    console.log("Login response:", data); // Debugging
-                    if (res.ok) {
-                        // Backend returned a 200 response with success data
-                        if (data.success) {
-                            handleRedirect(data.user_type); // Redirect to dashboard
-                        } else {
-                            // Backend signaled an issue (e.g., invalid credentials)
-                            setErrors({ global: data.error });
-                        }
-                    } else {
-                        // Backend returned a non-OK status (e.g., 400, 404)
-                        setErrors({ global: data.error || "Erreur inattendue. Veuillez réessayer." });
-                    }
-                })
-                .catch(() => {
-                    // Handle network or unexpected server issues
-                    setErrors({ global: "Erreur de connexion au serveur." });
+            try {
+                // Get the CSRF token first
+                await api.get('/accounts/csrf/');
+
+                // Then attempt login
+                const response = await api.post('/accounts/login/', {
+                    email,
+                    password,
                 });
+
+                if (response.data.success) {
+                    handleRedirect(response.data.user_type); // Redirect on success
+                } else {
+                    setErrors({ global: response.data.error });
+                }
+            } catch (error) {
+                setErrors({
+                    global:
+                        error.response?.data?.error || 'Erreur de connexion au serveur.',
+                });
+            }
         }
     };
 
-    const getCsrfToken = () => {
-        const csrfCookie = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("csrftoken="));
-        return csrfCookie ? csrfCookie.split("=")[1] : "";
-    };
 
     return (
         <LoginLayout>

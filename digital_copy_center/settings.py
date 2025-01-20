@@ -62,9 +62,11 @@ MIDDLEWARE = [
 
 # Security Settings
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = True
-CSRF_USE_SESSIONS = True
+CSRF_COOKIE_HTTPONLY = False  # Important for JavaScript access
+CSRF_USE_SESSIONS = False  # Use cookie instead of session
 CSRF_COOKIE_NAME = 'csrftoken'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
 CORS_ALLOWED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")  # Use the same origins

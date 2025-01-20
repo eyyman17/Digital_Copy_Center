@@ -1,5 +1,8 @@
-import React from "react";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import api from "./api/axios"; // Import the Axios configuration
 
 import Login from "./accounts_frontend/Login";
 import PasswordResetForm from "./accounts_frontend/PasswordResetForm";
@@ -50,6 +53,22 @@ import Add_Professor from "./direction_frontend/Add_Professor";
 //};
 
 const App = () => {
+
+  // Fetch CSRF token on app load
+  useEffect(() => {
+    const getCSRFToken = async () => {
+      try {
+        await api.get("/accounts/csrf/"); // Fetch CSRF token from the backend
+        console.log("CSRF token fetched successfully");
+      } catch (error) {
+        console.error("Error fetching CSRF token:", error);
+      }
+    };
+
+    getCSRFToken(); // Call the function on component mount
+  }, []);
+
+
   return (
     <Router>
       <Routes>
