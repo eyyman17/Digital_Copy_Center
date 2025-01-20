@@ -164,3 +164,5 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+FRONTEND_URL = os.environ.get("FRONTEND_URL").split(" ")
