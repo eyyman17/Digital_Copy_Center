@@ -10,7 +10,7 @@ from django.conf import settings
 
 import json
 
-@csrf_exempt
+@ensure_csrf_cookie
 def login_api(request):
     if request.method == 'POST':
         data = json.loads(request.body)
