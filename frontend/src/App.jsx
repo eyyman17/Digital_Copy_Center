@@ -2,7 +2,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import api, { getCSRFToken } from './api';
+import { getCSRFToken } from './utils/csrf';
+import api from './api';
 
 import Login from "./accounts_frontend/Login";
 import PasswordResetForm from "./accounts_frontend/PasswordResetForm";
