@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getCSRFToken } from '../utils/csrf';
 
-import api from '../api/axios';
+import api, { getCSRFToken } from '../api';
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
@@ -47,7 +47,7 @@ const LoginForm = () => {
         if (validateForm()) {
             try {
                 // Get the CSRF token first
-                await api.get('/accounts/csrf/');
+                await getCSRFToken();
 
                 // Then attempt login
                 const response = await api.post('/accounts/login/', {

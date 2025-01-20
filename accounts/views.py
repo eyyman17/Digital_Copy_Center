@@ -9,8 +9,11 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 
 import json
+from django.views.decorators.http import require_http_methods
+
 
 @ensure_csrf_cookie
+@require_http_methods(["GET", "OPTIONS"])
 def get_csrf_token(request):
     return JsonResponse({'message': 'CSRF cookie set'})
 
