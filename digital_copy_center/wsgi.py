@@ -14,3 +14,17 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'digital_copy_center.settings')
 
 application = get_wsgi_application()
+
+
+
+
+from django.apps import apps
+CustomUser = apps.get_model('accounts', 'CustomUser')
+
+if not CustomUser.objects.filter(username='admin').exists():
+    CustomUser.objects.create_superuser(
+        username='admin',
+        email='admin@example.com',
+        password='securepassword'
+    )
+    print("Superuser 'admin' created successfully.")
