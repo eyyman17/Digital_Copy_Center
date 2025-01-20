@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getCSRFToken } from '../utils/csrf';
 
-import api, { getCSRFToken } from '../api';
+import api from '../api';
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
