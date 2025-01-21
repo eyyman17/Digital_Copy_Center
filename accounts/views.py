@@ -17,7 +17,7 @@ from django.views.decorators.http import require_http_methods
 def get_csrf_token(request):
     return JsonResponse({'message': 'CSRF cookie set'})
 
-@csrf_exempt
+@ensure_csrf_cookie
 def login_api(request):
     if request.method == 'POST':
         data = json.loads(request.body)
