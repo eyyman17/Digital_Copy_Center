@@ -119,8 +119,8 @@ const App = () => {
           }
         /> */}
 
-        {/* Redirect unknown routes to login
-        <Route path="*" element={<Navigate to="/accounts/login/" replace />} /> */}
+        {/* Redirect unknown routes to login*/}
+        <Route path="*" element={<Navigate to="/accounts/login/" replace />} /> 
       </Routes>
     </Router>
   );
