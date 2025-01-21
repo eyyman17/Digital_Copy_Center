@@ -12,12 +12,12 @@ import json
 from django.views.decorators.http import require_http_methods
 
 
-@ensure_csrf_cookie
+@csrf_exempt
 @require_http_methods(["GET", "OPTIONS"])
 def get_csrf_token(request):
     return JsonResponse({'message': 'CSRF cookie set'})
 
-@ensure_csrf_cookie
+@csrf_exempt
 def login_api(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -47,7 +47,7 @@ def login_api(request):
     return JsonResponse({'error': 'Invalid method'}, status=405)
 
 
-
+@csrf_exempt
 def logout_api(request):
     if request.method == 'POST':
         logout(request)
