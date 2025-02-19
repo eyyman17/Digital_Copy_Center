@@ -4,20 +4,24 @@ from .forms import DocumentForm
 from .models import Document
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-
+from django.views.decorators.csrf import csrf_exempt
 
 from django.http import JsonResponse
 
 
+@csrf_exempt
 @login_required
 def current_professor(request):
     """
     Return the name of the currently logged-in professor.
     """
-    user = request.user
-    name = f"{user.first_name} {user.last_name}".strip() or user.username
-    return JsonResponse({"name": name})
-
+    if request.method == 'GET':
+        user = request.user
+        name = f"{user.first_name} {user.last_name}".strip() or user.username
+        response = JsonResponse({"name": name})
+        response["Access-Control-Allow-Credentials"] = "true"
+        return response
+    return JsonResponse({"error": "Method not allowed"}, status=405)
 
 
 @login_required
