@@ -6,15 +6,13 @@ import imsLogo from "../assets/ims_logo.png";
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchWithCSRF } from "../utils/csrfToken";
 
-import { getCSRFToken } from '../utils/csrf';
-
-import api from '../api';
-
-const LoginForm = () => {
+const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleRedirect = (userType) => {
@@ -43,32 +41,42 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
 
-        if (validateForm()) {
-            try {
-                // Get the CSRF token first
-                await getCSRFToken();
+        setLoading(true);
+        setErrors({});
 
-                // Then attempt login
-                const response = await api.post('/accounts/login/', {
-                    email,
-                    password,
-                });
+        try {
+            const response = await fetchWithCSRF(`${API_BASE_URL}/accounts/login/`, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    email: email,
+                    password 
+                })
+            });
 
-                if (response.data.success) {
-                    handleRedirect(response.data.user_type); // Redirect on success
-                } else {
-                    setErrors({ global: response.data.error });
-                }
-            } catch (error) {
-                setErrors({
-                    global:
-                        error.response?.data?.error || 'Erreur de connexion au serveur.',
+            const data = await response.json();
+            console.log("Login response:", data); // Debugging
+
+            if (response.ok && data.success) {
+                localStorage.setItem("user", JSON.stringify({
+                    isAuthenticated: true,
+                    role: data.user_type
+                }));
+                handleRedirect(data.user_type);
+            } else {
+                setErrors({ 
+                    global: data.error || "Erreur inattendue. Veuillez réessayer." 
                 });
             }
+        } catch (error) {
+            setErrors({ 
+                global: "Erreur de connexion au serveur." 
+            });
+        } finally {
+            setLoading(false);
         }
     };
-
 
     return (
         <LoginLayout>
@@ -127,13 +135,14 @@ const LoginForm = () => {
                 <div className="relative mt-4">
                     <button
                         type="submit"
-                        className="bg-custom-yellow text-white rounded-md px-4 py-2 w-full hover:bg-custom-dark-blue focus:outline-none focus:ring-2 focus:ring-custom-yellow mb-10"
+                        disabled={loading}
+                        className="bg-custom-yellow text-white rounded-md px-4 py-2 w-full hover:bg-custom-dark-blue focus:outline-none focus:ring-2 focus:ring-custom-yellow mb-10 disabled:opacity-50"
                     >
-                        Se connecter
+                        {loading ? "Connexion en cours..." : "Se connecter"}
                     </button>
                 </div>
                 <div className="flex">
-                        <img className="h-6" />
+                    <img className="h-6" />
                 </div>
                 <div className="absolute bottom-8 right-5">
                     <img src={imsLogo} alt="Logo IMS" className="h-20" />
@@ -143,4 +152,4 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default Login;

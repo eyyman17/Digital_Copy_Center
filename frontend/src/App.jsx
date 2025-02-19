@@ -1,9 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { getCSRFToken } from './utils/csrf';
-import api from './api';
 
 import Login from "./accounts_frontend/Login";
 import PasswordResetForm from "./accounts_frontend/PasswordResetForm";
@@ -19,64 +16,9 @@ import Direction_Doc_History from "./direction_frontend/Direction_Doc_History";
 import Professors_List from "./direction_frontend/Professors_List";
 import Add_Professor from "./direction_frontend/Add_Professor";
 
-// Protected Route component
-const ProtectedRoute = ({ children, allowedUserTypes = [] }) => {
-  const [authState, setAuthState] = React.useState({
-    isLoading: true,
-    isAuthenticated: false,
-    userType: null
-  });
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await api.get('/professors/current-professor/');
-        setAuthState({
-          isLoading: false,
-          isAuthenticated: true,
-          userType: response.data.user_type
-        });
-      } catch (error) {
-        setAuthState({
-          isLoading: false,
-          isAuthenticated: false,
-          userType: null
-        });
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  if (authState.isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!authState.isAuthenticated) {
-    return <Navigate to="/accounts/login/" replace />;
-  }
-
-  if (allowedUserTypes.length > 0 && !allowedUserTypes.includes(authState.userType)) {
-    return <Navigate to="/accounts/login/" replace />;
-  }
-
-  return children;
-};
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
-  // Initialize CSRF token when app loads
-  useEffect(() => {
-    const initializeCSRF = async () => {
-      try {
-        await getCSRFToken();
-      } catch (error) {
-        console.error('Failed to initialize CSRF token:', error);
-      }
-    };
-    
-    initializeCSRF();
-  }, []);
-
   return (
     <Router>
       <Routes>
@@ -87,49 +29,77 @@ const App = () => {
           path="/accounts/password_reset_confirm/:uid/:token/" 
           element={<PasswordResetConfirm />} 
         />
+        
+        {/* Professor Routes - Protected */}
+        <Route
+          path="/professors/document_submit/"
+          element={
+            <ProtectedRoute 
+              element={<DocumentSubmitForm />} 
+              allowedRole="professor" 
+            />
+          }
+        />
+        <Route
+          path="/professors/document_history/"
+          element={
+            <ProtectedRoute 
+              element={<ProfDocHistory />} 
+              allowedRole="professor" 
+            />
+          }
+        />
 
-        {/* Protected Professor Routes */}
-        <Route path="/professors/document_submit/" element={
-          <ProtectedRoute allowedUserTypes={['professor']}>
-            <DocumentSubmitForm />
-          </ProtectedRoute>
-        }/>
-        <Route path="/professors/document_history/" element={
-          <ProtectedRoute allowedUserTypes={['professor']}>
-            <ProfDocHistory />
-          </ProtectedRoute>
-        }/>
+        {/* Agent Routes */}
+        <Route
+          path="/agent/dashboard/"
+          element={
+            <ProtectedRoute 
+              element={<AgentDashboard />} 
+              allowedRole="agent" 
+            />
+          }
+        />
 
-        {/* Protected Agent Routes */}
-        <Route path="/agent/dashboard/" element={
-          <ProtectedRoute allowedUserTypes={['agent']}>
-            <AgentDashboard />
-          </ProtectedRoute>
-        }/>
+        {/* Direction/Admin Routes */}
+        <Route
+          path="/direction/dashboard/"
+          element={
+            <ProtectedRoute 
+              element={<DirectionDashboard />} 
+              allowedRole="direction" 
+            />
+          }
+        />
+        <Route
+          path="/direction/direction_history/"
+          element={
+            <ProtectedRoute 
+              element={<Direction_Doc_History />} 
+              allowedRole="direction" 
+            />
+          }
+        />
+        <Route
+          path="/direction/professors_list/"
+          element={
+            <ProtectedRoute 
+              element={<Professors_List />} 
+              allowedRole="direction" 
+            />
+          }
+        />
+        <Route
+          path="/direction/add_professor/"
+          element={
+            <ProtectedRoute 
+              element={<Add_Professor />} 
+              allowedRole="direction" 
+            />
+          }
+        />
 
-        {/* Protected Direction Routes */}
-        <Route path="/direction/dashboard/" element={
-          <ProtectedRoute allowedUserTypes={['direction']}>
-            <DirectionDashboard />
-          </ProtectedRoute>
-        }/>
-        <Route path="/direction/direction_history/" element={
-          <ProtectedRoute allowedUserTypes={['direction']}>
-            <Direction_Doc_History />
-          </ProtectedRoute>
-        }/>
-        <Route path="/direction/professors_list/" element={
-          <ProtectedRoute allowedUserTypes={['direction']}>
-            <Professors_List />
-          </ProtectedRoute>
-        }/>
-        <Route path="/direction/add_professor/" element={
-          <ProtectedRoute allowedUserTypes={['direction']}>
-            <Add_Professor />
-          </ProtectedRoute>
-        }/>
-
-        {/* Default Route */}
+        {/* Redirect unknown routes to login */}
         <Route path="*" element={<Navigate to="/accounts/login/" replace />} />
       </Routes>
     </Router>
