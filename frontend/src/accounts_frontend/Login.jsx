@@ -6,12 +6,13 @@ import imsLogo from "../assets/ims_logo.png";
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchWithCSRF } from "../utils/csrfToken";
 
-
-const LoginForm = () => {
+const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleRedirect = (userType) => {
@@ -38,50 +39,43 @@ const LoginForm = () => {
         return true;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            fetch(`${API_BASE_URL}/accounts/login/`, {
+        if (!validateForm()) return;
+
+        setLoading(true);
+        setErrors({});
+
+        try {
+            const response = await fetchWithCSRF(`${API_BASE_URL}/accounts/login/`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCsrfToken(),
-                },
                 body: JSON.stringify({ 
                     email: email,
                     password 
-                }),
-                credentials: "include",
-            })
-                .then(async (res) => {
-                    // Always parse the response JSON, even for non-OK responses
-                    const data = await res.json();
-                    console.log("Login response:", data); // Debugging
-                    if (res.ok) {
-                        // Backend returned a 200 response with success data
-                        if (data.success) {
-                            handleRedirect(data.user_type); // Redirect to dashboard
-                        } else {
-                            // Backend signaled an issue (e.g., invalid credentials)
-                            setErrors({ global: data.error });
-                        }
-                    } else {
-                        // Backend returned a non-OK status (e.g., 400, 404)
-                        setErrors({ global: data.error || "Erreur inattendue. Veuillez réessayer." });
-                    }
                 })
-                .catch(() => {
-                    // Handle network or unexpected server issues
-                    setErrors({ global: "Erreur de connexion au serveur." });
-                });
-        }
-    };
+            });
 
-    const getCsrfToken = () => {
-        const csrfCookie = document.cookie
-            .split("; ")
-            .find((row) => row.startsWith("csrftoken="));
-        return csrfCookie ? csrfCookie.split("=")[1] : "";
+            const data = await response.json();
+            console.log("Login response:", data); // Debugging
+
+            if (response.ok && data.success) {
+                localStorage.setItem("user", JSON.stringify({
+                    isAuthenticated: true,
+                    role: data.user_type
+                }));
+                handleRedirect(data.user_type);
+            } else {
+                setErrors({ 
+                    global: data.error || "Erreur inattendue. Veuillez réessayer." 
+                });
+            }
+        } catch (error) {
+            setErrors({ 
+                global: "Erreur de connexion au serveur." 
+            });
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -141,13 +135,14 @@ const LoginForm = () => {
                 <div className="relative mt-4">
                     <button
                         type="submit"
-                        className="bg-custom-yellow text-white rounded-md px-4 py-2 w-full hover:bg-custom-dark-blue focus:outline-none focus:ring-2 focus:ring-custom-yellow mb-10"
+                        disabled={loading}
+                        className="bg-custom-yellow text-white rounded-md px-4 py-2 w-full hover:bg-custom-dark-blue focus:outline-none focus:ring-2 focus:ring-custom-yellow mb-10 disabled:opacity-50"
                     >
-                        Se connecter
+                        {loading ? "Connexion en cours..." : "Se connecter"}
                     </button>
                 </div>
                 <div className="flex">
-                        <img className="h-6" />
+                    <img className="h-6" />
                 </div>
                 <div className="absolute bottom-8 right-5">
                     <img src={imsLogo} alt="Logo IMS" className="h-20" />
@@ -157,4 +152,4 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default Login;
