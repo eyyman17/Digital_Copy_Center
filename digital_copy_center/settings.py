@@ -76,12 +76,15 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
     'access-control-allow-credentials',  # Add this
     'access-control-allow-origin',       # Add this
+    'Content-Type',
+    'X-CSRFToken',
 ]
 
 # Session Settings
-SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = 'None' 
-SESSION_COOKIE_DOMAIN = None  
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'  
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_DOMAIN = None
 
 # CSRF Settings
 CSRF_COOKIE_SECURE = not DEBUG
