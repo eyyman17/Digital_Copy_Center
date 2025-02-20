@@ -60,25 +60,10 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
-# Security Settings
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_HTTPONLY = False  # Important for JavaScript access
-CSRF_USE_SESSIONS = False  # Use cookie instead of session
-CSRF_COOKIE_NAME = 'csrftoken'
-CSRF_COOKIE_SAMESITE = 'Lax'
-
-
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
-CORS_ALLOWED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
+# CORS Settings
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-]
+CORS_ALLOWED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
+CORS_ALLOW_ALL_ORIGINS = False  
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -89,13 +74,20 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'access-control-allow-credentials',  # Add this
+    'access-control-allow-origin',       # Add this
 ]
-CORS_ALLOW_ALL_ORIGINS = False 
 
+# Session Settings
 SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds
-SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'None' 
+SESSION_COOKIE_DOMAIN = None  
+
+# CSRF Settings
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = 'None'  
+CSRF_COOKIE_DOMAIN = None  
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS").split(" ")
 
 # Security Headers
 SECURE_SSL_REDIRECT = not DEBUG
