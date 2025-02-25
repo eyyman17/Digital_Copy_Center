@@ -1,10 +1,10 @@
 # Digital_Copy_Center
 
-📝 About the Project
+# 📝 About the Project
 The ESITH Digital Copy Center is a digital solution designed to modernize and optimize the document printing process at the copy center of ESITH (Higher School of Textile and Clothing Industries). This project aims to replace a manual and time-consuming system with an efficient, fast, and traceable digital solution.
 
 
-🔍 Problem Solved
+# 🔍 Problem Solved
 
 -> Before the Platform :
 - Teachers had to physically go to the copy center
@@ -22,7 +22,7 @@ The ESITH Digital Copy Center is a digital solution designed to modernize and op
 - Dashboards and statistics for administration
 
 
-🚀 Features
+# 🚀 Features
 
 1- Digital Submission of Print Orders
   * Online form for teachers
@@ -42,7 +42,7 @@ The ESITH Digital Copy Center is a digital solution designed to modernize and op
   * Reports for accounting and administration
 
 
-💻 Technologies Used (on the final version)
+# 💻 Technologies Used
 
 Frontend: ReactJS
 Backend: Django
@@ -51,44 +51,44 @@ Database: PostgreSQL
 (on "version-1" branch, we used Html, Css, Javascript for the frontend)
 
 
-🔧 Installation and Deployment
+# 🔧 Installation and Deployment
 
-# Clone the repository
+* Clone the repository
 git clone https://github.com/eyyman17/Digital_Copy_Center.git
 
-# Access the directory
+* Access the directory
 cd Digital_Copy_Center
 
-# Create and activate virtual environment
+* Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate 
 
-# Install Python dependencies
+* Install Python dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
+* Configure environment variables
 cp .env.example .env
-# Edit the .env file with your own configurations
+(Edit the .env file with your own configurations)
 
-# Run migrations
+* Run migrations
 python manage.py migrate
 
-# Create superuser (admin)
+* Create superuser (admin)
 python manage.py createsuperuser
 
-# Start Django development server
+* Start Django development server
 python manage.py runserver
 
-# Navigate to the frontend directory
+* Navigate to the frontend directory
 cd frontend
 
-# Install dependencies
+* Install dependencies
 npm install
 
-# Start React development server
+* Start React development server
 npm run dev
 
-👥 Users and Roles
+# 👥 Users and Roles
 
 1-Teachers
  * Submit print requests
@@ -106,7 +106,7 @@ npm run dev
  * Manage billing
  * 
 
-📈 Benefits
+# 📈 Benefits
 -> Significant time savings for all stakeholders
 -> Reduction of administrative paperwork
 -> Improved traceability of prints
