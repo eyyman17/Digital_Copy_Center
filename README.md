@@ -27,15 +27,19 @@ The ESITH Digital Copy Center is a digital solution designed to modernize and op
 1- Digital Submission of Print Orders
   * Online form for teachers
   * Direct upload of documents to be printed
+
 2- Print Management for the Copy Center Agent
   * Dedicated interface to process orders
   * Update of print status
+
 3- Notification System
   * Automatic email alerts
   * Generation of unique 4-digit codes for collection
+
 4- Secure Collection
   * Code validation without physical signature
   * Electronic confirmation of document delivery
+
 5- Administrative Dashboard
   * Detailed tracking of each step of the process
   * Statistics on print volumes
