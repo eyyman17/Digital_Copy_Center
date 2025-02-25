@@ -128,4 +128,16 @@ npm run dev
  * Reduction of administrative paperwork
  * Improved traceability of prints
  * Optimization of copy center resources
- * Increased transparency for administration 
+ * Increased transparency for administration
+
+# 📸 Screenshots
+
+![login page](https://github.com/user-attachments/assets/7cae1efc-877c-48e2-bd7a-248e89612a79)
+
+![form](https://github.com/user-attachments/assets/b16812dd-98d9-455b-8426-eeee3d0e1b41)
+
+![history](https://github.com/user-attachments/assets/d97e036d-e205-417d-b787-d9b11efb083a)
+
+![agent](https://github.com/user-attachments/assets/26103353-29c1-4b2b-9961-868eb764f432)
+
+
