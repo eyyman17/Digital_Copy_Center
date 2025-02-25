@@ -53,39 +53,39 @@ Database: PostgreSQL
 
 # 🔧 Installation and Deployment
 
-* Clone the repository
+- Clone the repository :
 git clone https://github.com/eyyman17/Digital_Copy_Center.git
 
-* Access the directory
+- Access the directory :
 cd Digital_Copy_Center
 
-* Create and activate virtual environment
+- Create and activate virtual environment :
 python -m venv venv
 source venv/bin/activate 
 
-* Install Python dependencies
+- Install Python dependencies :
 pip install -r requirements.txt
 
-* Configure environment variables
+- Configure environment variables :
 cp .env.example .env
 (Edit the .env file with your own configurations)
 
-* Run migrations
+- Run migrations :
 python manage.py migrate
 
-* Create superuser (admin)
+- Create superuser (admin) :
 python manage.py createsuperuser
 
-* Start Django development server
+- Start Django development server :
 python manage.py runserver
 
-* Navigate to the frontend directory
+- Navigate to the frontend directory :
 cd frontend
 
-* Install dependencies
+- Install dependencies :
 npm install
 
-* Start React development server
+- Start React development server :
 npm run dev
 
 # 👥 Users and Roles
@@ -104,11 +104,10 @@ npm run dev
  * Monitor the entire process
  * Access statistics
  * Manage billing
- * 
 
 # 📈 Benefits
--> Significant time savings for all stakeholders
--> Reduction of administrative paperwork
--> Improved traceability of prints
--> Optimization of copy center resources
--> Increased transparency for administration 
+ * Significant time savings for all stakeholders
+ * Reduction of administrative paperwork
+ * Improved traceability of prints
+ * Optimization of copy center resources
+ * Increased transparency for administration 
