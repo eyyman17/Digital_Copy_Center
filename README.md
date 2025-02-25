@@ -49,7 +49,9 @@ The ESITH Digital Copy Center is a digital solution designed to modernize and op
 # 💻 Technologies Used
 
 Frontend: ReactJS
+
 Backend: Django
+
 Database: PostgreSQL
 
 (on "version-1" branch, we used Html, Css, Javascript for the frontend)
@@ -58,38 +60,50 @@ Database: PostgreSQL
 # 🔧 Installation and Deployment
 
 - Clone the repository :
+
 git clone https://github.com/eyyman17/Digital_Copy_Center.git
 
 - Access the directory :
+
 cd Digital_Copy_Center
 
 - Create and activate virtual environment :
+
 python -m venv venv
 source venv/bin/activate 
 
 - Install Python dependencies :
+
 pip install -r requirements.txt
 
 - Configure environment variables :
+
 cp .env.example .env
+
 (Edit the .env file with your own configurations)
 
 - Run migrations :
+
 python manage.py migrate
 
 - Create superuser (admin) :
+
 python manage.py createsuperuser
 
 - Start Django development server :
+
 python manage.py runserver
 
 - Navigate to the frontend directory :
+
 cd frontend
 
 - Install dependencies :
+
 npm install
 
 - Start React development server :
+
 npm run dev
 
 # 👥 Users and Roles
